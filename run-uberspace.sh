@@ -4,8 +4,9 @@ set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TARGET="/var/www/virtual/floppnet/activities.flopp.net/"
+LOG="/home/floppnet/project-logs/activities.log"
 
-(cd "${DIR}" && git pull)
-(cd "${DIR}" && make setup run+sync)
-
-rsync -qa "${DIR}/web/" "${TARGET}"
+date >> "${LOG}"
+(cd "${DIR}" && git pull) >> "${LOG}"
+(cd "${DIR}" && make setup run+sync) >> "${LOG}"
+rsync -qa "${DIR}/web/" "${TARGET}" >> "${LOG}"
