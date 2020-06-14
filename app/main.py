@@ -88,7 +88,7 @@ class Main:
                 activity = self.load_activity(activity_file)
                 activity["strava_id"] = os.path.split(activity_folder)[1]
                 all.append(activity)
-        with open(".web/activities.js", "w") as all_file:
+        with open("web/activities.js", "w") as all_file:
             all_file.write("activities = ")
             json.dump(sorted(all, key=lambda k: k["start_date_local"], reverse=True), all_file)
             all_file.write(";\n")
