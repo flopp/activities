@@ -13,15 +13,9 @@ format:
 	.env/bin/black *.py app/*.py auth/*.py
 
 .PHONY: run
-run: .web/Polyline.encoded.js
+run:
 	.env/bin/python run.py
 
 .PHONY: run+sync
-run+sync: .web/Polyline.encoded.js
+run+sync:
 	.env/bin/python run.py --sync
-
-.web/Polyline.encoded.js:
-	curl \
-	    --silent \
-	    --output $@ \
-	    https://raw.githubusercontent.com/jieter/Leaflet.encoded/master/Polyline.encoded.js
