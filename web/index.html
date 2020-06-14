@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Activities</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@1.12.0/css/OverlayScrollbars.min.css">
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+     <body>
+        <nav class="navbar is-dark" role="navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="#">
+                  <img src="flopp.png">
+                </a>
+                <div class="navbar-item">
+                    <div class="control">
+                        <div class="select">
+                            <select id="categories">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div id="map"></div>
+
+        <div id="sidebar">
+            <div id="activities"></div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/polyline-encoded@0.0.9/Polyline.encoded.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@1.12.0/js/OverlayScrollbars.min.js"></script>
+        <script src="activities.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

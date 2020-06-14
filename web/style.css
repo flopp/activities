@@ -1,0 +1,37 @@
+html {
+    overflow-y: auto;
+}
+
+.navbar {
+    z-index: 2000;
+}
+
+#map {
+    position: absolute;
+    left: 300px;
+    right: 0px;
+    top: 52px;
+    bottom: 0px;
+}
+
+#sidebar {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: absolute;
+    left: 0px;
+    width: 300px;
+    top: 52px;
+    bottom: 0px;
+    background-color: #363636;
+}
+
+.activity {
+    cursor: pointer;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+.activity .value{
+    padding-left: 1rem;
+}
+
