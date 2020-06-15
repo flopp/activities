@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import flask
+import json
 import stravalib
 
 app = flask.Flask(__name__)
@@ -31,5 +32,7 @@ def auth_done():
         client_secret=app.config["client_secret"],
         code=code,
     )
-    print(token)
+    with open("account.json", "w") as account_config:
+        json.dump(token, account_config)
+
     return flask.redirect(flask.url_for("homepage"))
