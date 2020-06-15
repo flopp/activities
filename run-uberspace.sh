@@ -8,5 +8,13 @@ LOG="/home/floppnet/project-logs/activities.log"
 
 date >> "${LOG}"
 (cd "${DIR}" && git pull) >> "${LOG}"
-(cd "${DIR}" && make setup run+sync) >> "${LOG}"
+(cd "${DIR}" && make setup) >> "${LOG}"
+mkdir -p "${TARGET}" >> "${LOG}"
+(cd "${DIR}" && .env/bin/python run.py \
+    --sync \
+    --config config.json \
+    --account account.json \
+    --pois freiburg-summits.json \ 
+    --data .data \
+    --output "${TARGET}/activities.json") >> "${LOG}"
 rsync -qa "${DIR}/web/" "${TARGET}" >> "${LOG}"

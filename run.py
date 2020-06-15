@@ -5,23 +5,38 @@ import app
 import argparse
 
 args_parser = argparse.ArgumentParser()
+args_parser.add_argument("--config", metavar="JSON_FILE", default="config.json")
+args_parser.add_argument("--authdata", metavar="JSON_FILE", default="account.json")
+args_parser.add_argument("--pois", metavar="JSON_FILE")
+args_parser.add_argument("--data", metavar="DATA_DIR", default=".data")
+args_parser.add_argument("--output", metavar="JS_FILE", default="activities.json")
 args_parser.add_argument(
     "--sync", dest="sync", action="store_true", help="Sync activities.",
 )
 args = args_parser.parse_args()
 
-with open("config.json") as json_file:
-    config = json.load(json_file)
+main = app.main.Main()
 
-main = app.main.Main(config)
+with open(args.config) as f:
+    main.set_strava_app_config(json.load(f))
 
-with open("account.json") as f:
-    main.set_account(json.load(f))
+with open(args.authdata) as f:
+    main.set_authdata(json.load(f))
+
+if args.pois:
+    with open(args.pois) as f:
+        main.set_points_of_interest(json.load(f))
+
+main.set_data_dir(args.data)
 
 if args.sync:
     main.sync()
-    if main.account_changed:
-        with open("account.json", "w") as json_file:
-            json.dump(main.account, json_file)
+    if main.authdata_changed:
+        with open(args.authdata, "w") as f:
+            json.dump(main.authdata, f)
 
-main.analyze()
+activities = main.load()
+with open(args.output, "w") as f:
+    f.write("activities = ")
+    json.dump(activities, f)
+    f.write(";\n")

@@ -12,6 +12,10 @@ setup-dev: setup
 format:
 	.env/bin/black *.py app/*.py auth/*.py
 
+.PHONY: auth
+auth:
+	.env/bin/python run-auth.py
+
 .PHONY: run
 run:
 	.env/bin/python run.py

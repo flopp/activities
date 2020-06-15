@@ -7,9 +7,10 @@ import stravalib
 app = flask.Flask(__name__)
 
 
-def configure(config):
+def configure(config, authdata_file):
     app.config["client_id"] = config["client_id"]
     app.config["client_secret"] = config["client_secret"]
+    app.config["authdata_file"] = authdata_file
 
 
 @app.route("/")
@@ -20,7 +21,9 @@ def homepage():
         scope=None,
         redirect_uri="http://localhost:5000/auth",
     )
-    return flask.render_template("main.html", auth_url=auth_url)
+    return flask.render_template(
+        "main.html", auth_url=auth_url, authdata_file=app.config["authdata_file"]
+    )
 
 
 @app.route("/auth")
@@ -32,7 +35,7 @@ def auth_done():
         client_secret=app.config["client_secret"],
         code=code,
     )
-    with open("account.json", "w") as account_config:
-        json.dump(token, account_config)
+    with open(app.config["authdata_file"], "w") as f:
+        json.dump(token, f)
 
     return flask.redirect(flask.url_for("homepage"))

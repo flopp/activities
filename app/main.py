@@ -9,45 +9,49 @@ from app.valuerange import ValueRange
 
 
 class Main:
-    def __init__(self, config):
-        self.config = config
-        self.account = None
-        self.account_changed = False
+    def __init__(self):
+        self.config = None
+        self.authdata = None
+        self.authdata_changed = False
         self.client = stravalib.Client()
-        self.dir = ".data"
-        self.pois = [
-            ("Belchen", (47.822496, 7.833198)),
-            ("Feldberg", (47.873986, 8.004683)),
-            ("Hinterwaldkopf", (47.918979, 8.016681)),
-            ("Kandel", (48.062517, 8.011391)),
-            ("Kybfelsen", (47.960851, 7.885071)),
-            ("Rosskopf", (48.010010, 7.901702)),
-            ("Schauinsland", (47.911940, 7.898506)),
-            ("Schönberg", (47.954722, 7.805504)), 
-        ]
+        self.dir = None
+        self.pois = None
 
-    def set_account(self, account):
-        self.account = account
-        self.account_changed = False
+    def set_strava_app_config(self, strava_app_config):
+        for key in ["client_id", "client_secret"]:
+            if key not in strava_app_config:
+                raise KeyError(f'Key "{key}" is missing from app config.')
+        self.config = strava_app_config
+
+    def set_authdata(self, authdata):
+        for key in ["access_token", "refresh_token", "expires_at"]:
+            if key not in authdata:
+                raise KeyError(f'Key "{key}" is missing from auth data.')
+        self.authdata = authdata
+        self.authdata_changed = False
+
+    def set_data_dir(self, dir):
+        self.dir = dir
+
+    def set_points_of_interest(self, pois):
+        self.pois = pois
 
     def check_access(self):
-        assert self.account
-        if time.time() > self.account["expires_at"]:
+        if time.time() > self.authdata["expires_at"]:
             print("refreshing access token")
             response = self.client.refresh_access_token(
                 client_id=self.config["client_id"],
                 client_secret=self.config["client_secret"],
-                refresh_token=self.account["refresh_token"],
+                refresh_token=self.authdata["refresh_token"],
             )
-            print(f"response: {response}")
-            self.account["access_token"] = response["access_token"]
-            self.account["refresh_token"] = response["refresh_token"]
-            self.account["expires_at"] = response["expires_at"]
-            self.account_changed = True
+            self.authdata["access_token"] = response["access_token"]
+            self.authdata["refresh_token"] = response["refresh_token"]
+            self.authdata["expires_at"] = response["expires_at"]
+            self.authdata_changed = True
+        self.client.access_token = self.authdata["access_token"]
 
     def sync(self):
         self.check_access()
-        self.client.access_token = self.account["access_token"]
         athlete = self.client.get_athlete()
         os.makedirs(f"{self.dir}/{athlete.id}", exist_ok=True)
         with open(f"{self.dir}/{athlete.id}/data.json", "w") as f:
@@ -72,8 +76,8 @@ class Main:
                 return True
         return False
 
-    def analyze(self):
-        all = []
+    def load(self):
+        activities = []
         for athlete_folder in [f.path for f in os.scandir(self.dir) if f.is_dir()]:
             if not os.path.exists(os.path.join(athlete_folder, "data.json")):
                 print(f"Not an athlete folder: {athlete_folder}")
@@ -87,12 +91,8 @@ class Main:
                     continue
                 activity = self.load_activity(activity_file)
                 activity["strava_id"] = os.path.split(activity_folder)[1]
-                all.append(activity)
-        with open("web/activities.js", "w") as all_file:
-            all_file.write("activities = ")
-            json.dump(sorted(all, key=lambda k: k["start_date_local"], reverse=True), all_file)
-            all_file.write(";\n")
-        
+                activities.append(activity)
+        return sorted(activities, key=lambda k: k["start_date_local"], reverse=True)
 
     def load_activity(self, activity_file):
         with open(activity_file) as f:
@@ -112,17 +112,16 @@ class Main:
         summary_polyline, track = Main.get_polyline(data)
         if summary_polyline:
             activity["summary_polyline"] = summary_polyline
-        if track:
+        if track and self.pois:
             lat_range, lon_range = Main.compute_bbox(track)
             track_pois = []
-            for (name, point) in self.pois:
-                lat, lon = point
+            for (name, point) in self.pois.items():
+                lat, lon = point["lat"], point["lon"]
                 if not lat_range.contains(lat, 0.01) or not lon_range.contains(
                     lon, 0.01
                 ):
                     continue
                 if Main.is_point_on_track(point, track):
-                    print(f'{name} {data["start_date"]} {data["name"]}')
                     track_pois.append(name)
             if len(track_pois) > 0:
                 activity["pois"] = track_pois

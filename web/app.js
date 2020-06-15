@@ -45,24 +45,31 @@ var App = {
     },
 
     populateCategories: function() {
-        var by_pois = {All: 0};
+        var category_counts = new Map();
+        category_counts.set('All', 0);
         $.each(this.activities, function(key, item) {
-            by_pois['All'] += 1;
+            category_counts.set('All', category_counts.get('All') + 1)
             if ('pois' in item) {
                 $.each(item['pois'], function(category_index, category_name) {
-                    if (category_name in by_pois) {
-                        by_pois[category_name] += 1;
+                    if (category_counts.has(category_name)) {
+                        category_counts.set(category_name, category_counts.get(category_name) + 1)
                     } else {
-                        by_pois[category_name] = 1;
+                        category_counts.set(category_name, 1)
                     }
                 });
             }
         });
 
+        // Hide 'categories' select box if there only is the 'All' category.
+        if (category_counts.size == 1) {
+            $('#categories').parent().parent().parent().hide();
+            return;
+        }
+
         var sorted = [];
-        $.each(by_pois, function(poi_name, activity_count) {
-            sorted.push({name: poi_name, count: activity_count});
-        })
+        category_counts.forEach((count, category) =>
+            sorted.push({name: category, count: count})
+        );
         sorted.sort(function(a, b) {
             return b.count - a.count;
         });
