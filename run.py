@@ -15,8 +15,8 @@ with open("config.json") as json_file:
 
 main = app.main.Main(config)
 
-with open("account.json") as json_file:
-    main.set_account(json.load(json_file))
+with open("account.json") as f:
+    main.set_account(json.load(f))
 
 if args.sync:
     main.sync()
