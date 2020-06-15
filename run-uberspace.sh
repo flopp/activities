@@ -13,7 +13,7 @@ mkdir -p "${TARGET}" >> "${LOG}"
 (cd "${DIR}" && .env/bin/python run.py \
     --sync \
     --config config.json \
-    --account account.json \
+    --authdata account.json \
     --pois freiburg-summits.json \ 
     --data .data \
     --output "${TARGET}/activities.json") >> "${LOG}"

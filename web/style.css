@@ -10,7 +10,7 @@ html {
     position: absolute;
     left: 300px;
     right: 0px;
-    top: 52px;
+    top: 56px;
     bottom: 0px;
 }
 
@@ -20,7 +20,7 @@ html {
     position: absolute;
     left: 0px;
     width: 300px;
-    top: 52px;
+    top: 56px;
     bottom: 0px;
     background-color: #363636;
 }
