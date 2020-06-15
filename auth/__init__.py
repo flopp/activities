@@ -36,6 +36,6 @@ def auth_done():
         code=code,
     )
     with open(app.config["authdata_file"], "w") as f:
-        json.dump(token, f)
+        json.dump(token, f, indent=2)
 
     return flask.redirect(flask.url_for("homepage"))

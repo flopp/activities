@@ -33,10 +33,10 @@ if args.sync:
     main.sync()
     if main.authdata_changed:
         with open(args.authdata, "w") as f:
-            json.dump(main.authdata, f)
+            json.dump(main.authdata, f, indent=2)
 
 activities = main.load()
 with open(args.output, "w") as f:
     f.write("activities = ")
-    json.dump(activities, f)
+    json.dump(activities, f, indent=2)
     f.write(";\n")

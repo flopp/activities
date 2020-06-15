@@ -17,5 +17,5 @@ mkdir -p "${TARGET}" >> "${LOG}"
     --authdata account.json \
     --pois freiburg-summits.json \
     --data .data \
-    --output "${TARGET}/activities.json") >> "${LOG}"
+    --output "${TARGET}/activities.js") >> "${LOG}"
 rsync -qa "${DIR}/web/" "${TARGET}" >> "${LOG}"
