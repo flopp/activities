@@ -3,6 +3,7 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
 TARGET="/var/www/virtual/floppnet/activities.flopp.net/"
 LOG="/home/floppnet/project-logs/activities.log"
 
@@ -14,7 +15,7 @@ mkdir -p "${TARGET}" >> "${LOG}"
     --sync \
     --config config.json \
     --authdata account.json \
-    --pois freiburg-summits.json \ 
+    --pois freiburg-summits.json \
     --data .data \
     --output "${TARGET}/activities.json") >> "${LOG}"
 rsync -qa "${DIR}/web/" "${TARGET}" >> "${LOG}"
