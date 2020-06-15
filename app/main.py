@@ -121,7 +121,7 @@ class Main:
                     lon, 0.01
                 ):
                     continue
-                if Main.is_point_on_track(point, track):
+                if Main.is_point_on_track((lat, lon), track):
                     track_pois.append(name)
             if len(track_pois) > 0:
                 activity["pois"] = track_pois
