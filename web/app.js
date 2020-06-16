@@ -27,10 +27,10 @@ var App = {
         const map = L.map('map', {
             center: [48, 8],
             zoom: 13,
-            layers: [opentopomap]
+            layers: [openstreetmap]
         });
 
-        L.control.layers({"OpenTopoMap": opentopomap, "OpenStreetMap": openstreetmap}, {}).addTo(map);
+        L.control.layers({"OpenStreetMap": openstreetmap, "OpenTopoMap": opentopomap}, {}).addTo(map);
         map.zoomControl.setPosition('bottomright');
 
         return map;
