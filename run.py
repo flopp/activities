@@ -3,6 +3,7 @@
 import json
 import app
 import argparse
+import datetime
 
 args_parser = argparse.ArgumentParser()
 args_parser.add_argument("--config", metavar="JSON_FILE", default="config.json")
@@ -37,6 +38,8 @@ if args.sync:
 
 activities = main.load()
 with open(args.output, "w") as f:
-    f.write("activities = ")
+    f.write("const the_activities = ")
     json.dump(activities, f, indent=2)
     f.write(";\n")
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    f.write(f'const the_last_sync = "{now}";\n');

@@ -1,9 +1,9 @@
 $(function() {
-    App.init(activities);
+    App.init(the_activities, the_last_sync);
 });
 
 var App = {
-    init: function(activities) {
+    init: function(activities, last_sync) {
         this.selected_category = null;
         this.selected_activity = null;
         this.activities = activities;
@@ -12,6 +12,7 @@ var App = {
         this.initEventHandlers();
         this.populateCategories();
         this.loadActivities('All');
+        $('#last-sync').tex(`Last Sync: ${last_sync}`);
     },
     
     initMap: function() {
