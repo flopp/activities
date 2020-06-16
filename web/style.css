@@ -34,3 +34,6 @@ html {
     padding-left: 1rem;
 }
 
+.os-scrollbar-vertical {
+    right: 3px;
+}
