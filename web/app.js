@@ -12,7 +12,7 @@ var App = {
         this.initEventHandlers();
         this.populateCategories();
         this.loadActivities('All');
-        $('#last-sync').tex(`Last Sync: ${last_sync}`);
+        $('#last-sync').text(`Last Sync: ${last_sync}`);
     },
     
     initMap: function() {
