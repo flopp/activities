@@ -10,7 +10,7 @@ args_parser.add_argument("--config", metavar="JSON_FILE", default="config.json")
 args_parser.add_argument("--authdata", metavar="JSON_FILE", default="account.json")
 args_parser.add_argument("--pois", metavar="JSON_FILE")
 args_parser.add_argument("--data", metavar="DATA_DIR", default=".data")
-args_parser.add_argument("--output", metavar="JS_FILE", default="activities.json")
+args_parser.add_argument("--output", metavar="JS_FILE", default="activities.js")
 args_parser.add_argument(
     "--sync", dest="sync", action="store_true", help="Sync activities.",
 )
@@ -42,4 +42,4 @@ with open(args.output, "w") as f:
     json.dump(activities, f, indent=2)
     f.write(";\n")
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    f.write(f'const the_last_sync = "{now}";\n');
+    f.write(f'const the_last_sync = "{now}";\n')

@@ -1,5 +1,8 @@
 $(function() {
-    App.init(the_activities, the_last_sync);
+    App.init(
+        (typeof the_activities !== 'undefined') ? the_activities : [],
+        (typeof the_last_sync !== 'undefined') ? the_last_sync : "n/a"
+    );
 });
 
 var App = {
@@ -16,12 +19,20 @@ var App = {
     },
     
     initMap: function() {
-        var map = L.map('map').setView([48, 8], 13);
+        const openstreetmap = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'});
+        const opentopomap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors, SRTM | map style: © <a href="http://opentopomap.org/" target="_blank">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC-BY-SA</a>)'});
 
-        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        
+        const map = L.map('map', {
+            center: [48, 8],
+            zoom: 13,
+            layers: [opentopomap]
+        });
+
+        L.control.layers({"OpenTopoMap": opentopomap, "OpenStreetMap": openstreetmap}, {}).addTo(map);
+        map.zoomControl.setPosition('bottomright');
+
         return map;
     },
     
@@ -43,6 +54,9 @@ var App = {
                 self.loadActivities(category);
             });
         $("#sidebar").overlayScrollbars({className: "os-theme-light"});
+        $("#sidebar-toggle a").click(function() {
+            self.toggleSidebar();
+        });
     },
 
     populateCategories: function() {
@@ -177,7 +191,7 @@ var App = {
 
         if (selected_found) {
             this.loadActivity(this.selected_activity);
-        } else {
+        } else if (first_activity) {
             this.loadActivity(first_activity);
         }
     },
@@ -190,5 +204,12 @@ var App = {
             contents.push(`<span class="icon is-small"><i class="${icon}"></i></span><span class="value">${value}</span>`);
         });
         return contents.join('<br />');
+    },
+
+    toggleSidebar: function() {
+        $("#sidebar").toggleClass("sidebar-open");
+        $("#sidebar-toggle").toggleClass("sidebar-open");
+        $("#map").toggleClass("sidebar-open");
+        this.map.invalidateSize(false);
     }
 };

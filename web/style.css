@@ -8,10 +8,14 @@ html {
 
 #map {
     position: absolute;
-    left: 300px;
+    left: 0px;
     right: 0px;
     top: 56px;
     bottom: 0px;
+}
+
+#map.sidebar-open {
+    left: 300px;
 }
 
 #sidebar {
@@ -19,9 +23,37 @@ html {
     overflow-y: scroll;
     position: absolute;
     left: 0px;
-    width: 300px;
+    width: 0px;
     top: 56px;
     bottom: 0px;
+}
+
+#sidebar.sidebar-open {
+    width: 300px;
+}
+
+#sidebar-toggle {
+    display: block;
+    position: fixed;
+    top: 66px;
+    left: 0px;
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+    z-index: 2000;
+}
+
+#sidebar-toggle.sidebar-open {
+    left: 300px;
+}
+
+#sidebar-toggle a {
+    display: block;
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    font-size: 20px;
+    padding: 0;
 }
 
 .activity {
