@@ -1,10 +1,13 @@
 import datetime
-from geopy import distance as geopy_distance
 import json
 import os
+import time
+import sys
+
+from geopy import distance as geopy_distance
 import polyline
 import stravalib
-import time
+
 from app.valuerange import ValueRange
 
 
@@ -38,7 +41,7 @@ class Main:
 
     def check_access(self):
         if time.time() > self.authdata["expires_at"]:
-            print("refreshing access token")
+            print("Refreshing access token")
             response = self.client.refresh_access_token(
                 client_id=self.config["client_id"],
                 client_secret=self.config["client_secret"],
@@ -48,7 +51,9 @@ class Main:
             self.authdata["refresh_token"] = response["refresh_token"]
             self.authdata["expires_at"] = response["expires_at"]
             self.authdata_changed = True
+
         self.client.access_token = self.authdata["access_token"]
+        print("Access ok")
 
     def sync(self):
         self.check_access()
@@ -56,7 +61,11 @@ class Main:
         os.makedirs(f"{self.dir}/{athlete.id}", exist_ok=True)
         with open(f"{self.dir}/{athlete.id}/data.json", "w") as f:
             json.dump(athlete.to_dict(), f)
+
+        print("Start syncing")
         for activity in self.client.get_activities(before=datetime.datetime.utcnow()):
+            sys.stdout.write(".")
+            sys.stdout.flush()
             os.makedirs(f"{self.dir}/{athlete.id}/{activity.id}", exist_ok=True)
             activity_file_name = f"{self.dir}/{athlete.id}/{activity.id}/data.json"
             with open(activity_file_name, "w") as f:
