@@ -36,10 +36,16 @@ if args.sync:
         with open(args.authdata, "w") as f:
             json.dump(main.authdata, f, indent=2)
 
-activities = main.load()
+athlete, activities = main.load()
+
 with open(args.output, "w") as f:
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    f.write(f'const the_last_sync = "{now}";\n')
+
+    f.write("const the_strava_athlete = ")
+    json.dump(athlete, f, indent=2)
+    f.write(";\n")
+
     f.write("const the_activities = ")
     json.dump(activities, f, indent=2)
     f.write(";\n")
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    f.write(f'const the_last_sync = "{now}";\n')

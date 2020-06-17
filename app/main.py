@@ -60,8 +60,9 @@ class Main:
         athlete = self.client.get_athlete()
         os.makedirs(f"{self.dir}/{athlete.id}", exist_ok=True)
         with open(f"{self.dir}/{athlete.id}/data.json", "w") as f:
-            json.dump(athlete.to_dict(), f)
-
+            athlete_dict = athlete.to_dict()
+            athlete_dict["id"] = athlete.id
+            json.dump(athlete_dict, f)
         print("Start syncing")
         for activity in self.client.get_activities(before=datetime.datetime.utcnow()):
             sys.stdout.write(".")
@@ -86,11 +87,19 @@ class Main:
         return False
 
     def load(self):
+        athlete = {}
         activities = []
         for athlete_folder in [f.path for f in os.scandir(self.dir) if f.is_dir()]:
-            if not os.path.exists(os.path.join(athlete_folder, "data.json")):
+            athlete_file = os.path.join(athlete_folder, "data.json")
+            if not os.path.exists(athlete_file):
                 print(f"Not an athlete folder: {athlete_folder}")
                 continue
+            with open(athlete_file) as f:
+                athlete_data = json.load(f)
+                keys = ["id", "firstname", "lastname"]
+                athlete = dict(
+                    (key, athlete_data[key]) for key in keys if key in athlete_data
+                )
             for activity_folder in [
                 f.path for f in os.scandir(athlete_folder) if f.is_dir()
             ]:
@@ -101,7 +110,11 @@ class Main:
                 activity = self.load_activity(activity_file)
                 activity["strava_id"] = os.path.split(activity_folder)[1]
                 activities.append(activity)
-        return sorted(activities, key=lambda k: k["start_date_local"], reverse=True)
+            break
+        return (
+            athlete,
+            sorted(activities, key=lambda k: k["start_date_local"], reverse=True),
+        )
 
     def load_activity(self, activity_file):
         with open(activity_file) as f:

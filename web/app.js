@@ -1,21 +1,26 @@
 $(function() {
     App.init(
         (typeof the_activities !== 'undefined') ? the_activities : [],
+        (typeof the_strava_athlete !== 'undefined') ? the_strava_athlete : null,
         (typeof the_last_sync !== 'undefined') ? the_last_sync : "n/a"
     );
 });
 
 var App = {
-    init: function(activities, last_sync) {
+    init: function(activities, athlete, last_sync) {
+        this.activities = activities;
+        this.athlete = athlete;
         this.selected_category = null;
         this.selected_activity = null;
-        this.activities = activities;
         this.map = this.initMap();
         this.track = null;
         this.initEventHandlers();
         this.populateCategories();
         this.loadActivities('All');
         $('#last-sync').text(`Last Sync: ${last_sync}`);
+        if (this.athlete) {
+            $('#strava-button').attr('href', `https://www.strava.com/athletes/${this.athlete["id"]}`);
+        }
     },
     
     initMap: function() {
