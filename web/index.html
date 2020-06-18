@@ -7,17 +7,27 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@1.12.0/css/OverlayScrollbars.min.css">
         <link rel="stylesheet" href="style.css">
     </head>
 
      <body>
-        <nav class="navbar is-dark" role="navigation">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="#">
-                    <img src="logo.png">
-                </a>
-                <div class="navbar-item">
+        <div id="map"></div>
+
+        <div id="sidebar">
+            <div id="sidebar-activities" class="sidebar-container">
+                <div class="header">
+                    <span class="close"><i class="fas fa-times"></i></span>
+                    <h2>Activities</h2>
+                </div>
+                <div id="activities" class="scrollable-content">
+                </div>
+            </div>
+            <div id="sidebar-filter" class="sidebar-container">
+                <div class="header">
+                    <span class="close"><i class="fas fa-times"></i></span>
+                    <h2>Filters</h2>
+                </div>
+                <div class="content">
                     <div class="control">
                         <div class="select">
                             <select id="categories">
@@ -26,19 +36,21 @@
                     </div>
                 </div>
             </div>
-            <div class="navbar-end">
-                <div class="navbar-item">
-                    <span id="last-sync" class="has-text-grey">Last Sync: n/a</span>
+            <div id="sidebar-info" class="sidebar-container">
+                <div class="header">
+                    <span class="close"><i class="fas fa-times"></i></span>
+                    <h2>Info</h2>
                 </div>
-                <div class="navbar-item">
+                <div class="content">
+                    <span id="last-sync" class="has-text-grey">Last Sync: n/a</span>
                     <div class="buttons">
-                        <a id="strava-button" class="button is-light" href="https://www.strava.com/" target="_blank">
+                        <a id="strava-button" class="button is-fullwidth is-info" href="https://www.strava.com/" target="_blank">
                             <span class="icon">
                                 <i class="fab fa-strava"></i>
                             </span>
                             <span>Strava</span>
                         </a>
-                        <a class="button is-light" href="https://github.com/flopp/activities" target="_blank">
+                        <a class="button  is-fullwidth is-info" href="https://github.com/flopp/activities" target="_blank">
                             <span class="icon">
                                 <i class="fab fa-github"></i>
                             </span>
@@ -47,24 +59,29 @@
                     </div>
                 </div>
             </div>
-        </nav>
-
-        <div id="map" class="sidebar-open"></div>
-
-        <div id="sidebar" class="sidebar-open has-background-dark">
-            <div id="activities"></div>
         </div>
 
-        <div id="sidebar-toggle" class="sidebar-open has-background-info has-text-white">
-            <a href="#" class="button is-info">
-                <i class="far fa-list-alt"></i>
-            </a>
+        <div id="sidebar-controls">
+            <div class="sidebar-control" data-container="sidebar-activities">
+                <a href="#">
+                    <i class="far fa-list-alt"></i>
+                </a>
+            </div>
+            <div class="sidebar-control" data-container="sidebar-filter">
+                <a href="#">
+                    <i class="fas fa-filter"></i>
+                </a>
+            </div>
+            <div class="sidebar-control" data-container="sidebar-info">
+                <a href="#">
+                    <i class="fas fa-info-circle"></i>
+                </a>
+            </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/polyline-encoded@0.0.9/Polyline.encoded.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@1.12.0/js/OverlayScrollbars.min.js"></script>
         <script src="activities.js"></script>
         <script src="app.js"></script>
     </body>

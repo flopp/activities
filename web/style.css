@@ -2,16 +2,12 @@ html {
     overflow-y: auto;
 }
 
-.navbar {
-    z-index: 2000;
-}
-
 #map {
     position: absolute;
-    left: 0px;
-    right: 0px;
-    top: 56px;
-    bottom: 0px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
 }
 
 #map.sidebar-open {
@@ -19,41 +15,101 @@ html {
 }
 
 #sidebar {
-    overflow-x: hidden;
-    overflow-y: scroll;
-    position: absolute;
-    left: 0px;
-    width: 0px;
-    top: 56px;
-    bottom: 0px;
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 300px;
+    z-index: 30;
+    background: white;
 }
 
 #sidebar.sidebar-open {
-    width: 300px;
+    display: flex;
+    flex-direction: column;
 }
 
-#sidebar-toggle {
+#sidebar-controls {
     display: block;
     position: fixed;
-    top: 66px;
-    left: 0px;
-    width: 48px;
-    height: 48px;
-    overflow: hidden;
+    left: 0;
+    top: 0;
+    bottom: 0;
     z-index: 2000;
+    overflow: hidden;
 }
-
-#sidebar-toggle.sidebar-open {
+#sidebar-controls.sidebar-open {
     left: 300px;
 }
 
-#sidebar-toggle a {
+.sidebar-control {
+    margin-right: 0px;
+    margin-top: 10px;
+
+    background-color: rgba(0,0,0,0.6);
+    text-align: center;
+}
+
+.sidebar-control.active {
+    background-color: hsl(204, 86%, 53%);
+}
+
+.sidebar-control a {
     display: block;
-    width: 48px;
-    height: 48px;
-    line-height: 48px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
     font-size: 20px;
+    color: #ffffff;
+}
+
+.sidebar-container {
+    display: none;
+    width: 100%;
+}
+
+.sidebar-container.active {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    /* for Firefox */
+    min-height: 0;
+}
+
+.sidebar-container > .header {
+    padding: 10px 20px;
+    background-color: hsl(204, 86%, 53%);
+    color: #ffffff;
+}
+.sidebar-container > .header > .close {
+    float: right;
+    cursor: pointer;
+}
+.sidebar-container > .header > h2 {
+    margin: 0;
     padding: 0;
+    border: 0;
+    font-size: 100%;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.sidebar-container > .content {
+    margin: 8px;
+}
+
+.sidebar-container > .scrollable-content {
+    flex-grow: 1;
+    overflow: auto;
+
+    /* for Firefox */
+    min-height: 0;
+}
+
+#activities {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
 }
 
 .activity {

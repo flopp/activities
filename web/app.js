@@ -21,6 +21,8 @@ var App = {
         if (this.athlete) {
             $('#strava-button').attr('href', `https://www.strava.com/athletes/${this.athlete["id"]}`);
         }
+
+        this.toggleSidebar("sidebar-activities");
     },
     
     initMap: function() {
@@ -58,9 +60,19 @@ var App = {
                 });
                 self.loadActivities(category);
             });
-        $("#sidebar").overlayScrollbars({className: "os-theme-light"});
-        $("#sidebar-toggle a").click(function() {
-            self.toggleSidebar();
+        
+        document.querySelectorAll(".sidebar-control").forEach(control => {
+            const container_id = control.dataset.container;
+            const container = document.getElementById(container_id);
+        
+            container.querySelector(".header > .close").onclick = event => {
+                self.toggleSidebar(null);
+            };
+    
+            const a = control.getElementsByTagName("a")[0];
+            a.onclick = event => {
+                self.toggleSidebar(container_id);
+            };
         });
     },
 
@@ -79,12 +91,6 @@ var App = {
                 });
             }
         });
-
-        // Hide 'categories' select box if there only is the 'All' category.
-        if (category_counts.size == 1) {
-            $('#categories').parent().parent().parent().hide();
-            return;
-        }
 
         var sorted = [];
         category_counts.forEach((count, category) =>
@@ -117,16 +123,7 @@ var App = {
         $('.activity').removeClass('is-info');
         activity = $(`.activity[data-id="${id}"]`);
         activity.addClass('is-info');
-
-        const sidebar_rect = $('#sidebar')[0].getBoundingClientRect();
-        const rect = activity[0].getBoundingClientRect();
-        if (rect.bottom > sidebar_rect.bottom) {
-            activity[0].scrollIntoView(false);
-        }
-        if (rect.top < sidebar_rect.top) {
-            activity[0].scrollIntoView();
-        }
-
+        activity[0].scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
         var polyline = null;
         $.each(this.activities, function(key, item) {
             if (item['strava_id'] == id) {
@@ -211,10 +208,34 @@ var App = {
         return contents.join('<br />');
     },
 
-    toggleSidebar: function() {
-        $("#sidebar").toggleClass("sidebar-open");
-        $("#sidebar-toggle").toggleClass("sidebar-open");
-        $("#map").toggleClass("sidebar-open");
+    toggleSidebar: function(id) {
+        if (!id || document.getElementById(id).classList.contains("active")) {
+            document.getElementById("sidebar").classList.remove("sidebar-open");
+            document.getElementById("sidebar-controls").classList.remove("sidebar-open");
+            document.getElementById("map").classList.remove("sidebar-open");
+            document.querySelectorAll(".sidebar-control").forEach(control => {
+                const container_id = control.dataset.container;
+                const container = document.getElementById(container_id);
+                control.classList.remove("active");
+                container.classList.remove("active");
+            });
+        } else {
+            document.getElementById("sidebar").classList.add("sidebar-open");
+            document.getElementById("sidebar-controls").classList.add("sidebar-open");
+            document.getElementById("map").classList.add("sidebar-open");
+            document.querySelectorAll(".sidebar-control").forEach(control => {
+                const container_id = control.dataset.container;
+                const container = document.getElementById(container_id);
+                if (container_id === id) {
+                    control.classList.add("active");
+                    container.classList.add("active");
+                } else {
+                    control.classList.remove("active");
+                    container.classList.remove("active");
+                }
+            });
+        }
+
         this.map.invalidateSize(false);
     }
 };

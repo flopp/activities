@@ -10,7 +10,6 @@ https://activities.flopp.net
 - [Bulma](https://bulma.io/)
 - [Leaflet](https://leafletjs.com/)
 - [Leaflet.encoded](https://github.com/jieter/Leaflet.encoded)
-- [Overlay Scrollbars](https://kingsora.github.io/OverlayScrollbars)
 - [jQuery](https://jquery.com/)
 - [Flask](https://flask.palletsprojects.com/)
 - [Stravalib](https://github.com/hozn/stravalib)
