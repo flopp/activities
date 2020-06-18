@@ -22,20 +22,50 @@
                 <div id="activities" class="scrollable-content">
                 </div>
             </div>
+
             <div id="sidebar-filter" class="sidebar-container">
                 <div class="header">
                     <span class="close"><i class="fas fa-times"></i></span>
                     <h2>Filters</h2>
                 </div>
                 <div class="content">
-                    <div class="control">
-                        <div class="select">
-                            <select id="categories">
-                            </select>
+                    <div class="field">
+                        <label class="label">Name</label>
+                        <div class="control">
+                            <input id="filter-name" class="input" type="text" placeholder="Name Pattern">
                         </div>
+                    </div>
+                      
+                    <div class="field">
+                        <label class="label">Type</label>
+                        <div class="control has-icons-left">
+                            <div class="select is-fullwidth">
+                                <select id="filter-type"></select>
+                            </div>
+                            <div class="icon is-small is-left">
+                                <i class="far fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Category</label>
+                        <div class="control has-icons-left">
+                            <div class="select is-fullwidth">
+                                <select id="filter-category"></select>
+                            </div>
+                            <div class="icon is-small is-left">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <p>Matches: <span id="filter-matches">n/a</span></p>
                     </div>
                 </div>
             </div>
+
             <div id="sidebar-info" class="sidebar-container">
                 <div class="header">
                     <span class="close"><i class="fas fa-times"></i></span>

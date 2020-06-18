@@ -112,16 +112,15 @@ html {
     padding-bottom: 1.5rem;
 }
 
-.activity {
-    cursor: pointer;
+#activities .notification {
     margin-left: 1rem;
     margin-right: 1rem;
 }
 
-.activity .value{
-    padding-left: 1rem;
+.activity {
+    cursor: pointer;
 }
 
-.os-scrollbar-vertical {
-    right: 3px;
+.activity .value{
+    padding-left: 1rem;
 }
