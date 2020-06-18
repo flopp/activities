@@ -167,6 +167,7 @@ var App = {
             var title = `<strong>${item['name']}</strong>`;
             var table_items = [];
             table_items.push({icon: "far fa-calendar-alt", value: item['start_date_local'].replace('T', ' ')});
+            table_items.push({icon: "far fa-question-circle", value: item['type']});
             table_items.push({icon: "fas fa-arrows-alt-h", value: `${(item['distance'] / 1000).toFixed(2)} km`});
             table_items.push({icon: "fas fa-arrows-alt-v", value: `${item['total_elevation_gain']} m`});
             table_items.push({icon: "fas fa-stopwatch",    value: item['moving_time']});
