@@ -8,14 +8,15 @@ https://activities.flopp.net
 ## Made with
 
 - [Bulma](https://bulma.io/)
-- [Leaflet](https://leafletjs.com/)
-- [Leaflet.encoded](https://github.com/jieter/Leaflet.encoded)
-- [jQuery](https://jquery.com/)
+- [Click](https://click.palletsprojects.com/)
 - [Flask](https://flask.palletsprojects.com/)
-- [Stravalib](https://github.com/hozn/stravalib)
 - [geopy](https://github.com/geopy/geopy)
+- [jQuery](https://jquery.com/)
+- [Leaflet.encoded](https://github.com/jieter/Leaflet.encoded)
+- [Leaflet](https://leafletjs.com/)
 - [polyline](https://github.com/hicsail/polyline)
-
+- [SQLAlchemy](https://www.sqlalchemy.org)
+- [Stravalib](https://github.com/hozn/stravalib)
 
 ## License
 

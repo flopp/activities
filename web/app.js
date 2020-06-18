@@ -32,7 +32,7 @@ var App = {
 
         this.toggleSidebar("sidebar-activities");
     },
-    
+
     initMap: function() {
         const openstreetmap = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'});
@@ -50,7 +50,7 @@ var App = {
 
         return map;
     },
-    
+
     initEventHandlers: function() {
         var self = this;
         $(document).on('click', '.activity', function () {

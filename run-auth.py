@@ -4,7 +4,6 @@ import json
 
 import click
 
-import app
 import auth
 
 

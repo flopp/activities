@@ -1,6 +1,7 @@
-.data
-.env
+.env/
+.venv/
 __pycache__
 account.json
 config.json
 activities.js
+data.db

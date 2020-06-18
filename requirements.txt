@@ -2,4 +2,5 @@ click
 flask
 geopy
 polyline
+sqlalchemy
 stravalib
