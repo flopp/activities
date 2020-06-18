@@ -40,7 +40,10 @@ class Main:
         self.pois = pois
 
     def check_access(self):
-        if time.time() > self.authdata["expires_at"]:
+        now = datetime.datetime.fromtimestamp(time.time())
+        expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
+        print(f'Access token valid until {expires_at} (now is {now})')
+        if now >= expires_at:
             print("Refreshing access token")
             response = self.client.refresh_access_token(
                 client_id=self.config["client_id"],
@@ -50,6 +53,8 @@ class Main:
             self.authdata["access_token"] = response["access_token"]
             self.authdata["refresh_token"] = response["refresh_token"]
             self.authdata["expires_at"] = response["expires_at"]
+            expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
+            print(f'New access token will expire at {expires_at}')
             self.authdata_changed = True
 
         self.client.access_token = self.authdata["access_token"]
