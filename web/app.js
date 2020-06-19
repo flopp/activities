@@ -9,6 +9,7 @@ $(function() {
 var App = {
     init: function(activities, athlete, last_sync) {
         this.activities = activities;
+        this.added_activities = 0;
         this.athlete = athlete;
         this.filter_name = null;
         this.filter_type = null;
@@ -19,7 +20,11 @@ var App = {
         this.initEventHandlers();
         this.populateFilters();
         this.populateActivities();
+        if (this.activities.length > 0) {
+            this.loadActivity(this.activities[0]['strava_id']);
+        }
         this.filterActivities('', 'All', 'All');
+        $('#no-activities-message').hide();
         $('#last-sync').text(`Last Sync: ${last_sync}`);
         if (this.athlete) {
             $('#strava-button').attr('href', `https://www.strava.com/athletes/${this.athlete["id"]}`);
@@ -227,46 +232,54 @@ var App = {
 
     populateActivities: function() {
         var self = this;
-        var first_activity = null;
-        
-        if (this.activities.length > 0) {
-            $('#no-activities-message').hide();
-        } else {
-            $('#no-activities-message').show();
-        }
 
-        this.activities.forEach(item => {
-            var activity_div = $('<div class="notification activity">')
-                .attr('data-id', item['strava_id']);
-            var title = `<strong>${item['name']}</strong>`;
-            var table_items = [];
-            table_items.push({icon: "far fa-calendar-alt", value: item['start_date_local'].replace('T', ' ')});
-            table_items.push({icon: "far fa-question-circle", value: `<a class="type" data-type="${item['type']}">${item['type']}</a>`});
-            table_items.push({icon: "fas fa-arrows-alt-h", value: `${(item['distance'] / 1000).toFixed(2)} km`});
-            table_items.push({icon: "fas fa-arrows-alt-v", value: `${item['total_elevation_gain']} m`});
-            table_items.push({icon: "fas fa-stopwatch",    value: item['moving_time']});
-            if ('pois' in item) {
-                var links = [];
-                item['pois'].forEach(category => {
-                    links.push(`<a class="category" data-category="${category}">${category}</a>`);
-                });
-                if (links.length > 0) {
-                    table_items.push({icon: "fas fa-map-marker-alt", value: links.join(' · ')});
+        // initially load 20 activities.
+        var init = (self.added_activities === 0);
+        var count = 0;
+        this.activities.forEach(activity => {
+            if ($(`.activity[data-id="${activity['strava_id']}"]`).length > 0) {
+                return;
+            }
+            if (init) {
+                count += 1;
+                if (count > 20) {
+                    return;
                 }
             }
-            var strava = `<small><a href="https://www.strava.com/activities/${item['strava_id']}" target="_blank">View on Strava</a></small>`;
-            var content = $(`${title}<br />${self.createTable(table_items)}<br />${strava}`);
-            activity_div.append(content);
-            if (!first_activity) {
-                first_activity = item['strava_id'];
-            }
-            if (self.selected_activity == item['strava_id']) {
-                selected_found = true;
-            }
-            $('#activities').append(activity_div);
+            self.createActivityDiv(activity);
         });
 
-        this.loadActivity(first_activity);
+        // schedule loading the remaining activities
+        if (this.added_activities < this.activities.length) {
+            setTimeout(function() { self.populateActivities(); }, 1000);
+        }
+    },
+
+    createActivityDiv: function(activity) {
+        this.added_activities += 1;
+        const strava_id = activity['strava_id'];
+        var activity_div = $('<div class="notification activity">')
+                .attr('data-id', strava_id);
+        var title = `<strong>${activity['name']}</strong>`;
+        var table_items = [];
+        table_items.push({icon: "far fa-calendar-alt", value: activity['start_date_local'].replace('T', ' ')});
+        table_items.push({icon: "far fa-question-circle", value: `<a class="type" data-type="${activity['type']}">${activity['type']}</a>`});
+        table_items.push({icon: "fas fa-arrows-alt-h", value: `${(activity['distance'] / 1000).toFixed(2)} km`});
+        table_items.push({icon: "fas fa-arrows-alt-v", value: `${activity['total_elevation_gain']} m`});
+        table_items.push({icon: "fas fa-stopwatch",    value: activity['moving_time']});
+        if ('pois' in activity) {
+            var links = [];
+            activity['pois'].forEach(category => {
+                links.push(`<a class="category" data-category="${category}">${category}</a>`);
+            });
+            if (links.length > 0) {
+                table_items.push({icon: "fas fa-map-marker-alt", value: links.join(' · ')});
+            }
+        }
+        var strava = `<small><a href="https://www.strava.com/activities/${strava_id}" target="_blank">View on Strava</a></small>`;
+        var content = $(`${title}<br />${this.createTable(table_items)}<br />${strava}`);
+        activity_div.append(content);
+        $('#activities').append(activity_div);
     },
 
     createTable: function(table_items) {
