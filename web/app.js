@@ -169,7 +169,7 @@ var App = {
             }
         }
         if (this.filter_category !== null && this.filter_category !== 'All') {
-            if (!('pois' in activity) || !(activity['pois'].includes(self.filter_category))) {
+            if (!('pois' in activity) || !(activity['pois'].includes(this.filter_category))) {
                 return false;
             }
         }
