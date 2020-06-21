@@ -179,12 +179,16 @@ var App = {
         var found = false;
 
         this.activities.forEach(activity => {
+            if (!self.matchesFilter(activity)) {
+                return;
+            }
+            const id = activity['strava_id'];
             if (!found) {
-                if (activity['strava_id'] === self.selected_activity) {
+                if (id == self.selected_activity) {
                     found = true;
                 }
             } else if (load === null) {
-                load = activity['strava_id'];
+                load = id;
             }
         });
 
@@ -199,11 +203,15 @@ var App = {
         var found = false;
 
         this.activities.forEach(activity => {
+            if (!self.matchesFilter(activity)) {
+                return;
+            }
+            const id = activity['strava_id'];
             if (!found) {
-                if (activity['strava_id'] === self.selected_activity) {
+                if (id == self.selected_activity) {
                     found = true;
                 } else {
-                    load = activity['strava_id'];
+                    load = id;
                 }
             }
         });
@@ -370,6 +378,18 @@ var App = {
                     container.classList.remove("active");
                 }
             });
+
+            if (id == "sidebar-activities") {
+                const activity_div = $(`.activity[data-id="${this.selected_activity}"]`);
+                activity_div.addClass('is-info');
+                if (activity_div.length > 0) {
+                    activity_div[0].scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest",
+                        inline: "nearest"
+                    });
+                }
+            };
         }
 
         this.map.invalidateSize(false);
