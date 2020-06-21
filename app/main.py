@@ -43,7 +43,7 @@ class Main:
         now = datetime.datetime.fromtimestamp(time.time())
         expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
         print(f'Access token valid until {expires_at} (now is {now})')
-        if now >= expires_at:
+        if now + datetime.timedelta(minutes=5) >= expires_at:
             print("Refreshing access token")
             response = self.client.refresh_access_token(
                 client_id=self.config["client_id"],
