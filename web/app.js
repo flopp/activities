@@ -56,6 +56,12 @@ var App = {
         $(document).on('click', '.activity', function () {
             self.loadActivity($(this).data('id'));
         });
+        $("#prev-button").click(function() {
+            self.loadPrevActivity();
+        });
+        $("#next-button").click(function() {
+            self.loadNextActivity();
+        });
         $(document).on('click', '.type', function () {
             const type = $(this).data('type');
             self.filterActivities(self.filter_name, type, self.filter_category);
@@ -147,19 +153,63 @@ var App = {
         if (id === null) {
             this.displayPolyline(null);
         } else {
-            const activity = $(`.activity[data-id="${id}"]`);
-            activity.addClass('is-info');
-            activity[0].scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
+            const activity_div = $(`.activity[data-id="${id}"]`);
+            activity_div.addClass('is-info');
+            activity_div[0].scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
             var polyline = null;
-            this.activities.forEach(item => {
-                if (item['strava_id'] == id) {
-                    if ('summary_polyline' in item) {
-                        polyline = item['summary_polyline'];
+            this.activities.forEach(activity => {
+                if (activity['strava_id'] == id) {
+                    if ('summary_polyline' in activity) {
+                        polyline = activity['summary_polyline'];
                     }
+                    $("#activity-name").text(activity['name']);
+                    $("#activity-date").text(activity['start_date_local'].replace('T', ' '));
+                    $("#activity-distance").text(`${(activity['distance'] / 1000).toFixed(2)} km`);
+                    $("#activity-time").text(activity['moving_time']);
                     return;
                 }
             });
             this.displayPolyline(polyline);
+        }
+    },
+
+    loadPrevActivity: function() {
+        const self = this;
+        var load = null;
+        var found = false;
+
+        this.activities.forEach(activity => {
+            if (!found) {
+                if (activity['strava_id'] === self.selected_activity) {
+                    found = true;
+                }
+            } else if (load === null) {
+                load = activity['strava_id'];
+            }
+        });
+
+        if (load !== null && found) {
+            this.loadActivity(load);
+        }
+    },
+
+    loadNextActivity: function() {
+        const self = this;
+        var load = null;
+        var found = false;
+
+        this.activities.forEach(activity => {
+            if (!found) {
+                if (activity['strava_id'] === self.selected_activity) {
+                    found = true;
+                } else {
+                    load = activity['strava_id'];
+                }
+            }
+        });
+
+        if (load !== null && found) {
+            this.loadActivity(load);
         }
     },
 
@@ -296,6 +346,7 @@ var App = {
         if (!id || document.getElementById(id).classList.contains("active")) {
             document.getElementById("sidebar").classList.remove("sidebar-open");
             document.getElementById("sidebar-controls").classList.remove("sidebar-open");
+            document.getElementById("bottombar").classList.remove("sidebar-open");
             document.getElementById("map").classList.remove("sidebar-open");
             document.querySelectorAll(".sidebar-control").forEach(control => {
                 const container_id = control.dataset.container;
@@ -306,6 +357,7 @@ var App = {
         } else {
             document.getElementById("sidebar").classList.add("sidebar-open");
             document.getElementById("sidebar-controls").classList.add("sidebar-open");
+            document.getElementById("bottombar").classList.add("sidebar-open");
             document.getElementById("map").classList.add("sidebar-open");
             document.querySelectorAll(".sidebar-control").forEach(control => {
                 const container_id = control.dataset.container;

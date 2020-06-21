@@ -7,11 +7,33 @@ html {
     left: 0;
     right: 0;
     top: 0;
-    bottom: 0;
+    bottom: 56px;
 }
 
 #map.sidebar-open {
     left: 300px;
+    bottom: 0;
+}
+
+#bottombar {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    padding: 0.2rem;
+    overflow: hidden;
+}
+
+#bottombar.sidebar-open {
+    display: none;
+}
+
+#bottombar .buttons {
+    position: absolute;
+    right: 0.2rem;
+    top: 0.2rem;
 }
 
 #sidebar {
