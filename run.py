@@ -1,51 +1,66 @@
 #!/usr/bin/env python3
 
-import json
-import app
-import argparse
 import datetime
+import json
 
-args_parser = argparse.ArgumentParser()
-args_parser.add_argument("--config", metavar="JSON_FILE", default="config.json")
-args_parser.add_argument("--authdata", metavar="JSON_FILE", default="account.json")
-args_parser.add_argument("--pois", metavar="JSON_FILE")
-args_parser.add_argument("--data", metavar="DATA_DIR", default=".data")
-args_parser.add_argument("--output", metavar="JS_FILE", default="web/activities.js")
-args_parser.add_argument(
-    "--sync", dest="sync", action="store_true", help="Sync activities.",
-)
-args = args_parser.parse_args()
+import click
 
-main = app.main.Main()
+import app
 
-with open(args.config) as f:
-    main.set_strava_app_config(json.load(f))
 
-with open(args.authdata) as f:
-    main.set_authdata(json.load(f))
+@click.command()
+@click.option("-c", "--config", default="config.json",
+              metavar="JSON_FILE", type=click.Path(exists=True))
+@click.option("-a", "--authdata", default="account.json",
+              metavar="JSON_FILE", type=click.Path(exists=True))
+@click.option("-p", "--pois",
+              metavar="JSON_FILE", type=click.Path())
+@click.option("-d", "--data", default=".data",
+              metavar="DATA_DIR", type=click.Path())
+@click.option("-o", "--output", default="web/activities.js",
+              metavar="JS_FILE", type=click.Path())
+@click.option("-s", "--sync", is_flag=True,
+              help="Sync activities.")
+@click.option("-b", "--browser", is_flag=True,
+              help="Open the generated website in a web browser..")
+def run(config, authdata, pois, data, output, sync, browser):
+    main = app.main.Main()
 
-if args.pois:
-    with open(args.pois) as f:
-        main.set_points_of_interest(json.load(f))
+    with open(config) as f:
+        main.set_strava_app_config(json.load(f))
 
-main.set_data_dir(args.data)
+    with open(authdata) as f:
+        main.set_authdata(json.load(f))
 
-if args.sync:
-    main.sync()
-    if main.authdata_changed:
-        with open(args.authdata, "w") as f:
-            json.dump(main.authdata, f, indent=2)
+    if pois:
+        with open(pois) as f:
+            main.set_points_of_interest(json.load(f))
 
-athlete, activities = main.load()
+    main.set_data_dir(data)
 
-with open(args.output, "w") as f:
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    f.write(f'const the_last_sync = "{now}";\n')
+    if sync:
+        main.sync()
+        if main.authdata_changed:
+            with open(authdata, "w") as f:
+                json.dump(main.authdata, f, indent=2)
 
-    f.write("const the_strava_athlete = ")
-    json.dump(athlete, f, indent=2)
-    f.write(";\n")
+    athlete, activities = main.load()
 
-    f.write("const the_activities = ")
-    json.dump(activities, f, indent=2)
-    f.write(";\n")
+    with open(output, "w") as f:
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        f.write(f"const the_last_sync = '{now}';\n")
+
+        f.write("const the_strava_athlete = ")
+        json.dump(athlete, f, indent=2)
+        f.write(";\n")
+
+        f.write("const the_activities = ")
+        json.dump(activities, f, indent=2)
+        f.write(";\n")
+
+    if browser:
+        click.launch("web/index.html")
+
+
+if __name__ == "__main__":
+    run()

@@ -1,17 +1,36 @@
 #!/usr/bin/env python3
 
 import json
+
+import click
+
 import app
 import auth
-import argparse
 
-args_parser = argparse.ArgumentParser()
-args_parser.add_argument("--config", metavar="JSON_FILE", default="config.json")
-args_parser.add_argument("--authdata", metavar="JSON_FILE", default="account.json")
-args = args_parser.parse_args()
 
-with open(args.config) as f:
-    config = json.load(f)
+HTTP_PORT = 5000
 
-auth.configure(config, args.authdata)
-auth.app.run(port=5000, debug=True)
+
+@click.command()
+@click.option('--config', default='config.json',
+              metavar='JSON_FILE', type=click.Path(exists=True))
+@click.option('--authdata', default='account.json',
+              metavar='JSON_FILE', type=click.Path())
+def run_auth(config, authdata):
+    """
+    Run a simple web server to get authentication data to run the sync process
+
+    Read from config.json file and output to account.json
+    """
+    with open(config) as f:
+        config_content = json.load(f)
+
+    auth.configure(config_content, authdata)
+
+    click.launch(f"http://127.0.0.1:{HTTP_PORT}/")
+
+    auth.app.run(port=HTTP_PORT, debug=True)
+
+
+if __name__ == '__main__':
+    run_auth()
