@@ -1,23 +1,21 @@
 import datetime
-import json
-import os
 import time
 import sys
 
-from geopy import distance as geopy_distance
 import polyline
 import stravalib
+from sqlalchemy import desc
 
-from app.valuerange import ValueRange
+from app.db import init_db, Athlete, Activity
 
 
 class Main:
-    def __init__(self):
+    def __init__(self, db_path):
         self.config = None
         self.authdata = None
         self.authdata_changed = False
         self.client = stravalib.Client()
-        self.dir = None
+        self.session = init_db(db_path)
         self.pois = None
 
     def set_strava_app_config(self, strava_app_config):
@@ -32,9 +30,6 @@ class Main:
                 raise KeyError(f'Key "{key}" is missing from auth data.')
         self.authdata = authdata
         self.authdata_changed = False
-
-    def set_data_dir(self, dir):
-        self.dir = dir
 
     def set_points_of_interest(self, pois):
         self.pois = pois
@@ -62,116 +57,69 @@ class Main:
 
     def sync(self):
         self.check_access()
-        athlete = self.client.get_athlete()
-        os.makedirs(f"{self.dir}/{athlete.id}", exist_ok=True)
-        with open(f"{self.dir}/{athlete.id}/data.json", "w") as f:
-            athlete_dict = athlete.to_dict()
-            athlete_dict["id"] = athlete.id
-            json.dump(athlete_dict, f)
+        strava_athlete = self.client.get_athlete()
+
+        athlete = self.session.query(Athlete).filter_by(id=strava_athlete.id).first()
+        if not athlete:
+            athlete = Athlete(
+                id=strava_athlete.id,
+                firstname=strava_athlete.firstname,
+                lastname=strava_athlete.lastname,
+            )
+            self.session.add(athlete)
+            self.session.commit()
+
         print("Start syncing")
-        for activity in self.client.get_activities(before=datetime.datetime.utcnow()):
+        for strava_activity in self.client.get_activities(
+            before=datetime.datetime.utcnow()
+        ):
             sys.stdout.write(".")
             sys.stdout.flush()
-            os.makedirs(f"{self.dir}/{athlete.id}/{activity.id}", exist_ok=True)
-            activity_file_name = f"{self.dir}/{athlete.id}/{activity.id}/data.json"
-            with open(activity_file_name, "w") as f:
-                json.dump(activity.to_dict(), f)
 
-    @staticmethod
-    def is_point_on_track(point, track, max_distance_meters=100):
-        point_lat, point_lon = point
-        for coordinates in track:
-            lat, lon = coordinates
-            if (
-                abs(point_lat - lat) < 0.01
-                and abs(point_lon - lon) < 0.01
-                and geopy_distance.geodesic(point, coordinates).meters
-                < max_distance_meters
-            ):
-                return True
-        return False
+            activity = (
+                self.session.query(Activity)
+                .filter_by(strava_id=strava_activity.id)
+                .first()
+            )
+            if not activity:
+                activity = Activity(
+                    strava_id=strava_activity.id,
+                    athlete=athlete,
+                    name=strava_activity.name,
+                    distance=strava_activity.distance,
+                    moving_time=strava_activity.moving_time,
+                    elapsed_time=strava_activity.elapsed_time,
+                    total_elevation_gain=strava_activity.total_elevation_gain,
+                    type=strava_activity.type,
+                    start_date=strava_activity.start_date,
+                    start_date_local=strava_activity.start_date_local,
+                    location_country=strava_activity.location_country,
+                )
+
+                try:
+                    decoded = polyline.decode(strava_activity.map.summary_polyline)
+                    activity.summary_polyline = strava_activity.map.summary_polyline
+                    if decoded:
+                        activity.track = decoded
+                except:
+                    continue
+                self.session.add(activity)
+
+        self.session.commit()
 
     def load(self):
-        athlete = {}
-        activities = []
-        for athlete_folder in [f.path for f in os.scandir(self.dir) if f.is_dir()]:
-            athlete_file = os.path.join(athlete_folder, "data.json")
-            if not os.path.exists(athlete_file):
-                print(f"Not an athlete folder: {athlete_folder}")
-                continue
-            with open(athlete_file) as f:
-                athlete_data = json.load(f)
-                keys = ["id", "firstname", "lastname"]
-                athlete = dict(
-                    (key, athlete_data[key]) for key in keys if key in athlete_data
-                )
-            for activity_folder in [
-                f.path for f in os.scandir(athlete_folder) if f.is_dir()
-            ]:
-                activity_file = os.path.join(activity_folder, "data.json")
-                if not os.path.exists(activity_file):
-                    print(f"Not an activity folder: {activity_folder}")
-                    continue
-                activity = self.load_activity(activity_file)
-                activity["strava_id"] = os.path.split(activity_folder)[1]
-                activities.append(activity)
-            break
-        return (
-            athlete,
-            sorted(activities, key=lambda k: k["start_date_local"], reverse=True),
+        athlete = self.session.query(Athlete).first()
+        activities = (
+            self.session.query(Activity)
+            .filter_by(athlete_id=athlete.id)
+            .order_by(desc(Activity.start_date_local))
         )
 
-    def load_activity(self, activity_file):
-        with open(activity_file) as f:
-            data = json.load(f)
-        keys = [
-            "name",
-            "distance",
-            "moving_time",
-            "elapsed_time",
-            "total_elevation_gain",
-            "type",
-            "start_date",
-            "start_date_local",
-            "location_country",
-        ]
-        activity = dict((key, data[key]) for key in keys if key in data)
-        summary_polyline, track = Main.get_polyline(data)
-        if summary_polyline:
-            activity["summary_polyline"] = summary_polyline
-        if track and self.pois:
-            lat_range, lon_range = Main.compute_bbox(track)
-            track_pois = []
-            for (name, point) in self.pois.items():
-                lat, lon = point["lat"], point["lon"]
-                if not lat_range.contains(lat, 0.01) or not lon_range.contains(
-                    lon, 0.01
-                ):
-                    continue
-                if Main.is_point_on_track((lat, lon), track):
-                    track_pois.append(name)
-            if len(track_pois) > 0:
-                activity["pois"] = track_pois
-        return activity
+        athlete_dict = athlete.to_dict()
+        activity_list = []
 
-    @staticmethod
-    def get_polyline(activity):
-        if "map" not in activity:
-            return None, None
-        if "summary_polyline" not in activity["map"]:
-            return None, None
-        summary_polyline = activity["map"]["summary_polyline"]
-        if summary_polyline is None:
-            return None, None
-        decoded = polyline.decode(summary_polyline)
-        return summary_polyline, decoded if len(decoded) > 0 else None
+        for activity in activities:
+            activity.set_pois(self.pois)
+            activity_list.append(activity.to_dict())
 
-    @staticmethod
-    def compute_bbox(track):
-        assert len(track) > 0
-        lat_range = ValueRange()
-        lon_range = ValueRange()
-        for (lat, lon) in track:
-            lat_range.add(lat)
-            lon_range.add(lon)
-        return lat_range, lon_range
+        return (athlete_dict, activity_list)
