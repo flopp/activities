@@ -4,7 +4,7 @@ import sys
 
 import polyline
 import stravalib
-from sqlalchemy import desc
+from sqlalchemy import func, desc
 
 from app.db import init_db, Athlete, Activity
 
@@ -55,7 +55,7 @@ class Main:
         self.client.access_token = self.authdata["access_token"]
         print("Access ok")
 
-    def sync(self):
+    def sync(self, force=False):
         self.check_access()
         strava_athlete = self.client.get_athlete()
 
@@ -70,9 +70,16 @@ class Main:
             self.session.commit()
 
         print("Start syncing")
-        for strava_activity in self.client.get_activities(
-            before=datetime.datetime.utcnow()
-        ):
+        if force:
+            filters = {"before": datetime.datetime.utcnow()}
+        else:
+            last_activity_date = self.session.query(
+                func.max(Activity.start_date)
+            ).scalar()
+
+            filters = {"after": last_activity_date}
+
+        for strava_activity in self.client.get_activities(**filters):
             sys.stdout.write(".")
             sys.stdout.flush()
 

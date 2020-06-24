@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import os
 
 import click
 
@@ -22,8 +23,14 @@ import app
 @click.option("-s", "--sync", is_flag=True,
               help="Sync activities.")
 @click.option("-b", "--browser", is_flag=True,
-              help="Open the generated website in a web browser..")
-def run(config, authdata, pois, data, output, sync, browser):
+              help="Open the generated website in a web browser.")
+@click.option("-f", "--force", is_flag=True,
+              help="Force sync for older activities than the last synced.")
+def run(config, authdata, pois, data, output, sync, browser, force):
+    # Drop DB if sync and force mode enabled
+    if sync and force:
+        os.remove(data)
+
     main = app.main.Main(data)
 
     with open(config) as f:
@@ -37,7 +44,7 @@ def run(config, authdata, pois, data, output, sync, browser):
             main.set_points_of_interest(json.load(f))
 
     if sync:
-        main.sync()
+        main.sync(force)
         if main.authdata_changed:
             with open(authdata, "w") as f:
                 json.dump(main.authdata, f, indent=2)
