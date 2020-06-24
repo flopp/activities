@@ -18,11 +18,19 @@ var App = {
         this.map = this.initMap();
         this.track = null;
         this.initEventHandlers();
-        this.populateFilters();
-        this.populateActivities();
-        if (this.activities.length > 0) {
-            this.loadActivity(this.activities[0]['strava_id']);
+
+        var activity_id = null;
+        const regex = /^#(\d+)$/;
+        const match = window.location.hash.match(regex);
+        if (match && this.hasActivity(match[1])) {
+            activity_id = match[1];
+        } else if (this.activities.length > 0) {
+            activity_id = this.activities[0]['strava_id'];
         }
+        this.populateFilters();
+        this.populateActivities(activity_id);
+        this.toggleSidebar("sidebar-activities");
+        this.loadActivity(activity_id);
         this.filterActivities('', 'All', 'All');
         $('#no-activities-message').hide();
         $('#last-sync').text(`Last Sync: ${last_sync}`);
@@ -30,7 +38,6 @@ var App = {
             $('#strava-button').attr('href', `https://www.strava.com/athletes/${this.athlete["id"]}`);
         }
 
-        this.toggleSidebar("sidebar-activities");
     },
 
     initMap: function() {
@@ -147,28 +154,38 @@ var App = {
         }
     },
 
+    hasActivity: function(id) {
+        return this.getActivity(id) !== undefined;
+    },
+
+    getActivity: function(id) {
+        return this.activities.find(activity => {
+            return activity['strava_id'] == id;
+        });
+    },
+
     loadActivity: function(id) {
         this.selected_activity = id;
         $('.activity').removeClass('is-info');
         if (id === null) {
+            window.location.hash = "#";
             this.displayPolyline(null);
         } else {
+            window.location.hash = `#${id}`;
             const activity_div = $(`.activity[data-id="${id}"]`);
             activity_div.addClass('is-info');
             activity_div[0].scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
             var polyline = null;
-            this.activities.forEach(activity => {
-                if (activity['strava_id'] == id) {
-                    if ('summary_polyline' in activity) {
-                        polyline = activity['summary_polyline'];
-                    }
-                    $("#activity-name").text(activity['name']);
-                    $("#activity-date").text(activity['start_date_local'].replace('T', ' '));
-                    $("#activity-distance").text(`${(activity['distance'] / 1000).toFixed(2)} km`);
-                    $("#activity-time").text(activity['moving_time']);
-                    return;
+            const activity = this.getActivity(id);
+            if (activity !== undefined) {
+                if ('summary_polyline' in activity) {
+                    polyline = activity['summary_polyline'];
                 }
-            });
+                $("#activity-name").text(activity['name']);
+                $("#activity-date").text(activity['start_date_local'].replace('T', ' '));
+                $("#activity-distance").text(`${(activity['distance'] / 1000).toFixed(2)} km`);
+                $("#activity-time").text(activity['moving_time']);
+            }
             this.displayPolyline(polyline);
         }
     },
@@ -242,7 +259,10 @@ var App = {
     },
 
     filterActivities: function(name, type, category) {
-        if (name === this.filter_name && type === this.filter_type && category === this.filter_category) {
+        if (name === this.filter_name &&
+            type === this.filter_type &&
+            category === this.filter_category
+        ) {
             return;
         }
         this.filter_name = name;
@@ -288,28 +308,37 @@ var App = {
         } 
     },
 
-    populateActivities: function() {
+    populateActivities: function(search_id) {
         var self = this;
 
-        // initially load 20 activities.
+        // initially load 20 activities or enough activities until 'search_id' is found.
         var init = (self.added_activities === 0);
         var count = 0;
+        var idFound = false;
         this.activities.forEach(activity => {
-            if ($(`.activity[data-id="${activity['strava_id']}"]`).length > 0) {
+            const activity_id = activity['strava_id'];
+            if ($(`.activity[data-id="${activity_id}"]`).length > 0) {
                 return;
             }
-            if (init) {
-                count += 1;
-                if (count > 20) {
-                    return;
+            if (activity_id == search_id) {
+                idFound = true;
+                self.createActivityDiv(activity);
+            } else {
+                if (init) {
+                    count += 1;
+                    if ((count > 20) && (search_id === null || idFound)) {
+                        return;
+                    }
                 }
+                self.createActivityDiv(activity);
             }
-            self.createActivityDiv(activity);
         });
 
         // schedule loading the remaining activities
         if (this.added_activities < this.activities.length) {
-            setTimeout(function() { self.populateActivities(); }, 1000);
+            setTimeout(function() {
+                self.populateActivities(null);
+            }, 1000);
         }
     },
 
