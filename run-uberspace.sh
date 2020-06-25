@@ -24,7 +24,7 @@ LOG="/home/floppnet/project-logs/activities.log"
     HASH_STYLE_CSS="$(sha1sum "${DIR}/web/style.css" | awk '{printf("%.8s", $1);}')"
     HASH_ACTIVITIES_JS="$(sha1sum "${DIR}/web/activities.js" | awk '{printf("%.8s", $1);}')"
 
-    rm -f "${TARGET}/activities-*.js" "${TARGET}/app-*.js" "${TARGET}/style-*.css"
+    rm -f "${TARGET}"/activities-*.js "${TARGET}"/app-*.js "${TARGET}"/style-*.css
     cp "${DIR}/web/activities.js" "${TARGET}/activities-${HASH_ACTIVITIES_JS}.js"
     cp "${DIR}/web/app.js"        "${TARGET}/app-${HASH_APP_JS}.js"
     cp "${DIR}/web/style.css"     "${TARGET}/style-${HASH_STYLE_CSS}.css"
