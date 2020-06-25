@@ -14,6 +14,9 @@ var App = {
         this.filter_name = null;
         this.filter_type = null;
         this.filter_category = null;
+        this.filter_min_distance = 0;
+        this.filter_max_distance = null;
+        this.max_distance = null;
         this.selected_activity = null;
         this.map = this.initMap();
         this.track = null;
@@ -28,10 +31,11 @@ var App = {
             activity_id = this.activities[0]['strava_id'];
         }
         this.populateFilters();
+        this.filter_max_distance = this.max_distance;
         this.populateActivities(activity_id);
         this.toggleSidebar("sidebar-activities");
         this.loadActivity(activity_id);
-        this.filterActivities('', 'All', 'All');
+        this.filterActivities('', 'All', 'All', 0, this.max_distance);
         $('#no-activities-message').hide();
         $('#last-sync').text(`Last Sync: ${last_sync}`);
         if (this.athlete) {
@@ -71,14 +75,17 @@ var App = {
         });
         $(document).on('click', '.type', function () {
             const type = $(this).data('type');
-            self.filterActivities(self.filter_name, type, self.filter_category);
+            self.filterActivities(
+                self.filter_name, type, self.filter_category, self.filter_min_distance, self.filter_max_distance);
         });
         $(document).on('click', '.category', function () {
             const category = $(this).data('category');
-            self.filterActivities(self.filter_name, self.filter_type, category);
+            self.filterActivities(
+                self.filter_name, self.filter_type, category, self.filter_min_distance, self.filter_max_distance);
         });
         $("#filter-name").change(function () {
-            self.filterActivities($(this).val(), self.filter_type, self.filter_category);
+            self.filterActivities(
+                $(this).val(), self.filter_type, self.filter_category, self.filter_min_distance, self.filter_max_distance);
         });
         $("#filter-type")
             .change(function () {
@@ -86,7 +93,8 @@ var App = {
                 $("#filter-type option:selected").each(function() {
                     type = $(this).val();
                 });
-                self.filterActivities(self.filter_name, type, self.filter_category);
+                self.filterActivities(
+                    self.filter_name, type, self.filter_category, self.filter_min_distance, self.filter_max_distance);
             });
         $("#filter-category")
             .change(function () {
@@ -94,7 +102,8 @@ var App = {
                 $("#filter-category option:selected").each(function() {
                     category = $(this).val();
                 });
-                self.filterActivities(self.filter_name, self.filter_type, category);
+                self.filterActivities(
+                    self.filter_name, self.filter_type, category, self.filter_min_distance, self.filter_max_distance);
             });
         
         document.querySelectorAll(".sidebar-control").forEach(control => {
@@ -113,16 +122,21 @@ var App = {
     },
 
     populateFilters: function() {
+        const self = this;
         var types = new Set();
         var categories = new Set();
-        this.activities.forEach(item => {
-            types.add(item['type']);
-            if ('pois' in item) {
-                item['pois'].forEach(category => {
+        this.max_distance = 0;
+
+        this.activities.forEach(activity => {
+            self.max_distance = Math.max(activity['distance'], self.max_distance);
+            types.add(activity['type']);
+            if ('pois' in activity) {
+                activity['pois'].forEach(category => {
                     categories.add(category);
                 });
             }
         });
+        this.max_distance = Math.ceil(this.max_distance / 1000.0);
 
         $('#filter-type').append(
             $('<option value="All">All</option>')
@@ -139,6 +153,31 @@ var App = {
             $('#filter-category').append(
                 $(`<option value="${category}">${category}</option>`)
             );
+        });
+
+        const distance_slider = document.getElementById('filter-distance');
+        noUiSlider.create(distance_slider, {
+            start: [0, self.max_distance],
+            connect: true,
+            range: {
+                'min': 0,
+                'max': self.max_distance
+            },
+            format: {
+                to: function (value) {
+                    return value.toFixed(0);
+                },
+                from: function (value) {
+                    return Number(value);
+                }
+            },
+            step: 1,
+            tooltips: true
+        });
+        distance_slider.noUiSlider.on('set', function () {
+            const range = this.get();
+            self.filterActivities(
+                self.filter_name, self.filter_type, self.filter_category, Number(range[0]), Number(range[1]));
         });
     },
 
@@ -254,24 +293,33 @@ var App = {
                 return false;
             }
         }
+        const distance = activity['distance'] / 1000.0;
+        if (distance < this.filter_min_distance || distance > this.filter_max_distance) {
+            return false;
+        }
 
         return true;
     },
 
-    filterActivities: function(name, type, category) {
+    filterActivities: function(name, type, category, min_distance, max_distance) {
         if (name === this.filter_name &&
             type === this.filter_type &&
-            category === this.filter_category
+            category === this.filter_category &&
+            min_distance === this.filter_min_distance &&
+            max_distance === this.filter_max_distance
         ) {
             return;
         }
         this.filter_name = name;
         this.filter_type = type;
         this.filter_category = category;
+        this.filter_min_distance = min_distance;
+        this.filter_max_distance = max_distance;
         $('#filter-name').val(name);
         $('#filter-type').val(type);
         $('#filter-category').val(category);
-
+        document.getElementById('filter-distance').noUiSlider.set([min_distance, max_distance]);
+        console.log("distance", min_distance, max_distance)
         var self = this;
         var first_activity = null;
         var selected_found = false;

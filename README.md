@@ -15,6 +15,7 @@ https://activities.flopp.net
 - [Leaflet.encoded](https://github.com/jieter/Leaflet.encoded)
 - [Leaflet](https://leafletjs.com/)
 - [polyline](https://github.com/hicsail/polyline)
+- [noUiSlider](https://refreshless.com/nouislider/)
 - [SQLAlchemy](https://www.sqlalchemy.org)
 - [Stravalib](https://github.com/hozn/stravalib)
 
