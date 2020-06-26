@@ -3,6 +3,7 @@
 import datetime
 import json
 import os
+import sys
 
 import click
 
@@ -15,7 +16,7 @@ HTTP_PORT = 5000
 
 @click.command()
 @click.option("-c", "--config", default="config.json", metavar="JSON_FILE", type=click.Path(exists=True))
-@click.option("-a", "--authdata", default="account.json", metavar="JSON_FILE", type=click.Path(exists=True))
+@click.option("-a", "--authdata", default="account.json", metavar="JSON_FILE", type=click.Path())
 @click.option("-r", "--register", is_flag=True, help="Register Strava account.")
 @click.option("-s", "--sync", is_flag=True, help="Sync activities.")
 @click.option("-p", "--pois", metavar="JSON_FILE", type=click.Path())
@@ -34,6 +35,13 @@ def run(config, authdata, pois, data, output, sync, browser, force, register):
         auth.flask_app.configure(config_content, authdata)
         click.launch(f"http://127.0.0.1:{HTTP_PORT}/")
         auth.flask_app.app.run(port=HTTP_PORT, debug=True)
+
+    if not os.path.isfile(authdata):
+        if register:
+            print(f"Error: '{authdata}' has not been created by registration.")
+        else:
+            print(f"Error: Invalid value for '-a' / '--authdata': Path '{authdata}' does not exist.")
+        sys.exit(2)
 
     # Drop DB if sync and force mode enabled
     if sync and force:

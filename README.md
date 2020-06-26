@@ -26,7 +26,6 @@ python3 -m venv .env
 ### Authenticate with Strava (once!)
 
 ```
-touch auth.json
 .env/bin/python run.py --config config.json --authdata auth.json --register
 ```
 
