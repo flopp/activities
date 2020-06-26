@@ -36,11 +36,13 @@ def is_point_on_track(point, track, max_distance_meters=100):
     point_lat, point_lon = point
     for coordinates in track:
         lat, lon = coordinates
-        if (
+        is_on_track = (
             abs(point_lat - lat) < 0.01
             and abs(point_lon - lon) < 0.01
             and geopy_distance.geodesic(point, coordinates).meters < max_distance_meters
-        ):
+        )
+
+        if is_on_track:
             return True
     return False
 
@@ -78,6 +80,7 @@ class Activity(Base):
     location_country = Column(String)
     summary_polyline = Column(String)
     track = Column(PickleType)
+    pois = None
 
     def bbox(self):
         if self.track:
@@ -113,8 +116,9 @@ class Activity(Base):
             else:
                 out[key] = attr
 
-        if hasattr(self, "pois"):
+        if self.pois:
             out["pois"] = self.pois
+
         return out
 
 

@@ -100,7 +100,7 @@ class Main:
                     activity.summary_polyline = strava_activity.map.summary_polyline
                     if decoded:
                         activity.track = decoded
-                except:
+                except (AttributeError, TypeError):
                     continue
                 self.session.add(activity)
 
