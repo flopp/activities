@@ -4,7 +4,7 @@ Your self-hosted activities overview (running, cycling, ...). Synced with [Strav
 
 https://activities.flopp.net
 
-![Screenshot](https://raw.githubusercontent.com/flopp/activities/master/.github/screenshot.jpg "Screenshot")
+![Screenshot](https://raw.githubusercontent.com/flopp/activities/master/screenshot.jpg "Screenshot")
 
 ## Usage
 
