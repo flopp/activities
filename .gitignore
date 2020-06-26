@@ -1,7 +1,11 @@
 .env/
 .venv/
+.tox/
+
 __pycache__
 account.json
 config.json
 activities.js
 data.db
+*.egg-info/
+*.ipynb*
