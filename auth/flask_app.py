@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+import json
 
 import flask
-import json
+
 import stravalib
 
 app = flask.Flask(__name__)

@@ -26,11 +26,8 @@ HTTP_PORT = 5000
 def run(config, authdata, pois, data, output, sync, browser, force, register):
 
     if register:
-        """
-        Run a simple web server to get authentication data to run the sync process
-
-        Read from config.json file and output to account.json
-        """
+        # Run a simple web server to get authentication data to run the sync process
+        # Read from config.json file and output to account.json
         with open(config) as f:
             config_content = json.load(f)
 
