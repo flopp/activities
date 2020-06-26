@@ -6,7 +6,7 @@ import polyline
 import stravalib
 from sqlalchemy import func, desc
 
-from app.db import init_db, Athlete, Activity
+from generator.db import init_db, Athlete, Activity
 
 
 class Main:
@@ -37,7 +37,7 @@ class Main:
     def check_access(self):
         now = datetime.datetime.fromtimestamp(time.time())
         expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
-        print(f'Access token valid until {expires_at} (now is {now})')
+        print(f"Access token valid until {expires_at} (now is {now})")
         if now + datetime.timedelta(minutes=5) >= expires_at:
             print("Refreshing access token")
             response = self.client.refresh_access_token(
@@ -49,7 +49,7 @@ class Main:
             self.authdata["refresh_token"] = response["refresh_token"]
             self.authdata["expires_at"] = response["expires_at"]
             expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
-            print(f'New access token will expire at {expires_at}')
+            print(f"New access token will expire at {expires_at}")
             self.authdata_changed = True
 
         self.client.access_token = self.authdata["access_token"]
@@ -62,9 +62,7 @@ class Main:
         athlete = self.session.query(Athlete).filter_by(id=strava_athlete.id).first()
         if not athlete:
             athlete = Athlete(
-                id=strava_athlete.id,
-                firstname=strava_athlete.firstname,
-                lastname=strava_athlete.lastname,
+                id=strava_athlete.id, firstname=strava_athlete.firstname, lastname=strava_athlete.lastname,
             )
             self.session.add(athlete)
             self.session.commit()
@@ -73,9 +71,7 @@ class Main:
         if force:
             filters = {"before": datetime.datetime.utcnow()}
         else:
-            last_activity_date = self.session.query(
-                func.max(Activity.start_date)
-            ).scalar()
+            last_activity_date = self.session.query(func.max(Activity.start_date)).scalar()
 
             filters = {"after": last_activity_date}
 
@@ -83,11 +79,7 @@ class Main:
             sys.stdout.write(".")
             sys.stdout.flush()
 
-            activity = (
-                self.session.query(Activity)
-                .filter_by(strava_id=strava_activity.id)
-                .first()
-            )
+            activity = self.session.query(Activity).filter_by(strava_id=strava_activity.id).first()
             if not activity:
                 activity = Activity(
                     strava_id=strava_activity.id,
@@ -117,9 +109,7 @@ class Main:
     def load(self):
         athlete = self.session.query(Athlete).first()
         activities = (
-            self.session.query(Activity)
-            .filter_by(athlete_id=athlete.id)
-            .order_by(desc(Activity.start_date_local))
+            self.session.query(Activity).filter_by(athlete_id=athlete.id).order_by(desc(Activity.start_date_local))
         )
 
         athlete_dict = athlete.to_dict()

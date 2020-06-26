@@ -10,11 +10,11 @@ setup-dev: setup
 
 .PHONY: format
 format:
-	.env/bin/black *.py app/*.py auth/*.py
+	.env/bin/black *.py generator/*.py auth/*.py -l 120
 
 .PHONY: auth
 auth:
-	.env/bin/python run-auth.py
+	.env/bin/python run.py --register
 
 .PHONY: run
 run:

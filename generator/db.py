@@ -15,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from app.valuerange import ValueRange
+from generator.valuerange import ValueRange
 
 
 Base = declarative_base()
@@ -95,9 +95,7 @@ class Activity(Base):
             track_pois = []
             for (name, point) in pois.items():
                 lat, lon = point["lat"], point["lon"]
-                if not lat_range.contains(lat, 0.01) or not lon_range.contains(
-                    lon, 0.01
-                ):
+                if not lat_range.contains(lat, 0.01) or not lon_range.contains(lon, 0.01):
                     continue
                 if is_point_on_track((lat, lon), self.track):
                     track_pois.append(name)
