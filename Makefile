@@ -10,7 +10,7 @@ setup-dev: setup
 
 .PHONY: format
 format:
-	.env/bin/black *.py generator/*.py auth/*.py
+	.env/bin/black *.py generator/*.py auth/*.py -l 120
 
 .PHONY: auth
 auth:

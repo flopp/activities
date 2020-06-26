@@ -14,25 +14,15 @@ HTTP_PORT = 5000
 
 
 @click.command()
-@click.option("-c", "--config", default="config.json",
-              metavar="JSON_FILE", type=click.Path(exists=True))
-@click.option("-a", "--authdata", default="account.json",
-              metavar="JSON_FILE", type=click.Path(exists=True))
-@click.option("-r", "--register", is_flag=True,
-              help="Register Strava account.")
-@click.option("-s", "--sync", is_flag=True,
-              help="Sync activities.")
-
-@click.option("-p", "--pois",
-              metavar="JSON_FILE", type=click.Path())
-@click.option("-d", "--data", default="data.db",
-              metavar="DATA_FILE", type=click.Path())
-@click.option("-o", "--output", default="web/activities.js",
-              metavar="JS_FILE", type=click.Path())
-@click.option("-b", "--browser", is_flag=True,
-              help="Open the generated website in a web browser.")
-@click.option("-f", "--force", is_flag=True,
-              help="Force sync for older activities than the last synced.")
+@click.option("-c", "--config", default="config.json", metavar="JSON_FILE", type=click.Path(exists=True))
+@click.option("-a", "--authdata", default="account.json", metavar="JSON_FILE", type=click.Path(exists=True))
+@click.option("-r", "--register", is_flag=True, help="Register Strava account.")
+@click.option("-s", "--sync", is_flag=True, help="Sync activities.")
+@click.option("-p", "--pois", metavar="JSON_FILE", type=click.Path())
+@click.option("-d", "--data", default="data.db", metavar="DATA_FILE", type=click.Path())
+@click.option("-o", "--output", default="web/activities.js", metavar="JS_FILE", type=click.Path())
+@click.option("-b", "--browser", is_flag=True, help="Open the generated website in a web browser.")
+@click.option("-f", "--force", is_flag=True, help="Force sync for older activities than the last synced.")
 def run(config, authdata, pois, data, output, sync, browser, force, register):
 
     if register:
