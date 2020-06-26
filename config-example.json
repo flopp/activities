@@ -1,0 +1,4 @@
+{
+    "client_id": "YOUR STRAVA API CLIENT ID, e.g. 12345",
+    "client_secret": "YOUR STRAVA API CLIENT SECRET, e.g. f94a536071f0e473d18e8ad6864a8d547126d3e5"
+}

@@ -4,6 +4,48 @@ Your self-hosted activities overview (running, cycling, ...). Synced with [Strav
 
 https://activities.flopp.net
 
+![Screenshot](https://raw.githubusercontent.com/flopp/activities/master/.github/screenshot.jpg "Screenshot")
+
+## Usage
+
+### Installation
+
+```
+git clone https://github.com/flopp/activities.git
+cd activities
+python3 -m venv .env
+.env/bin/pip install -U pip
+.env/bin/pip install -r requirements.txt
+```
+
+### Fetch API Config from Strava (once!)
+
+1. Create an "Application" on https://www.strava.com/settings/api; for "Authorization Callback Domain" use "localhost", for all other properties you can basically use whatever you want ;)
+2. Copy `config-example.json` to `config.json` and fill in the "Client ID" and the "Client Secret" from the "My API Application" section on https://www.strava.com/settings/api.
+
+### Authenticate with Strava (once!)
+
+```
+touch auth.json
+.env/bin/python run.py --config config.json --authdata auth.json --register
+```
+
+Now a web browser window should open with an "Authenticate with Strava" button. If not, manually open "loacalhost:5000" in a web browser of your choice. Click "Authenticate with Strava". Allow access for the app.
+The authentication data is now saved in `auth.json` for later use.
+
+### Sync
+
+```
+.env/bin/python run.py \
+    --config config.json \
+    --authdata auth.json \
+    --sync \
+    ---browser
+```
+
+This fetches your Strava data, creates a static website, and opens a browser to view the website.
+You can also manually point a web browser of your choice to file:///INSTALLATION_PATH/web/index.html...
+
 
 ## Made with
 
