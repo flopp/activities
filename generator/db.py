@@ -15,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from app.valuerange import ValueRange
+from generator.valuerange import ValueRange
 
 
 Base = declarative_base()
