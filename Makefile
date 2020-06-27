@@ -1,7 +1,7 @@
 .PHONY: setup
 setup:
 	python3 -m venv .env
-	.env/bin/pip install -U pip
+	.env/bin/pip install --upgrade pip
 	.env/bin/pip install -r requirements.txt
 
 .PHONY: setup-dev
@@ -10,16 +10,21 @@ setup-dev: setup
 
 .PHONY: format
 format:
-	.env/bin/black *.py generator/*.py auth/*.py -l 120
+	.env/bin/black activities -l 120
+
+.PHONY: lint
+lint:
+	.env/bin/pylint activities
+
 
 .PHONY: auth
 auth:
-	.env/bin/python run.py --register
+	PYTHONPATH=. .env/bin/python activities/run.py --register
 
 .PHONY: run
 run:
-	.env/bin/python run.py
+	PYTHONPATH=. .env/bin/python activities/run.py
 
 .PHONY: run+sync
 run+sync:
-	.env/bin/python run.py --sync
+	PYTHONPATH=. .env/bin/python activities/run.py --sync

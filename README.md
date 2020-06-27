@@ -14,8 +14,8 @@ https://activities.flopp.net
 git clone https://github.com/flopp/activities.git
 cd activities
 python3 -m venv .env
-.env/bin/pip install -U pip
-.env/bin/pip install -r requirements.txt
+.env/bin/pip install --upgrade pip
+.env/bin/pip install .
 ```
 
 ### Fetch API Config from Strava (once!)
@@ -26,7 +26,10 @@ python3 -m venv .env
 ### Authenticate with Strava (once!)
 
 ```
-.env/bin/python run.py --config config.json --authdata auth.json --register
+.env/bin/activities \
+    --config config.json \
+    --authdata auth.json \
+    --register
 ```
 
 Now a web browser window should open with an "Authenticate with Strava" button. If not, manually open `localhost:5000` in a web browser of your choice. Click "Authenticate with Strava". Allow access for the app.
@@ -35,7 +38,7 @@ The authentication data is now saved in `auth.json` for later use.
 ### Sync
 
 ```
-.env/bin/python run.py \
+.env/bin/activities \
     --config config.json \
     --authdata auth.json \
     --sync \
@@ -43,7 +46,7 @@ The authentication data is now saved in `auth.json` for later use.
 ```
 
 This fetches your Strava data, creates a static website, and opens a browser to view the website.
-You can also manually point a web browser of your choice to file:///INSTALLATION_PATH/web/index.html...
+You can also manually point a web browser of your choice to `file:///INSTALLATION_PATH/web/index.html`...
 
 
 ## Made with

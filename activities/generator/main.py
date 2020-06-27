@@ -6,7 +6,7 @@ import polyline
 import stravalib
 from sqlalchemy import func, desc
 
-from generator.db import init_db, Athlete, Activity
+from activities.generator.db import init_db, Athlete, Activity
 
 
 class Main:

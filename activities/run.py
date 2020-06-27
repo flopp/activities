@@ -7,8 +7,8 @@ import sys
 
 import click
 
-import auth.flask_app
-import generator
+import activities.auth.flask_app as auth_app
+import activities.generator.main as generator_app
 
 
 HTTP_PORT = 5000
@@ -32,9 +32,9 @@ def run(config, authdata, pois, data, output, sync, browser, force, register):
         with open(config) as f:
             config_content = json.load(f)
 
-        auth.flask_app.configure(config_content, authdata)
+        auth_app.configure(config_content, authdata)
         click.launch(f"http://127.0.0.1:{HTTP_PORT}/")
-        auth.flask_app.app.run(port=HTTP_PORT, debug=True)
+        auth_app.app.run(port=HTTP_PORT, debug=True)
 
     if not os.path.isfile(authdata):
         if register:
@@ -47,7 +47,7 @@ def run(config, authdata, pois, data, output, sync, browser, force, register):
     if sync and force:
         os.remove(data)
 
-    main = generator.main.Main(data)
+    main = generator_app.Main(data)
 
     with open(config) as f:
         main.set_strava_app_config(json.load(f))
@@ -65,7 +65,7 @@ def run(config, authdata, pois, data, output, sync, browser, force, register):
             with open(authdata, "w") as f:
                 json.dump(main.authdata, f, indent=2)
 
-    athlete, activities = main.load()
+    athlete, activities_list = main.load()
     with open(output, "w") as f:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"const the_last_sync = '{now}';\n")
@@ -75,7 +75,7 @@ def run(config, authdata, pois, data, output, sync, browser, force, register):
         f.write(";\n")
 
         f.write("const the_activities = ")
-        json.dump(activities, f, indent=2)
+        json.dump(activities_list, f, indent=2)
         f.write(";\n")
 
     if browser:
