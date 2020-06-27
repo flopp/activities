@@ -18,8 +18,8 @@ auth:
 
 .PHONY: run
 run:
-	.env/bin/python run.py --pois freiburg-summits.json
+	.env/bin/python run.py
 
 .PHONY: run+sync
 run+sync:
-	.env/bin/python run.py --sync --pois freiburg-summits.json
+	.env/bin/python run.py --sync
