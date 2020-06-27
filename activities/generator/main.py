@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Tuple
 
 import polyline  # type: ignore
 import stravalib  # type: ignore
-from sqlalchemy import func, desc
+from sqlalchemy import func
 
 from activities.generator.db import init_db, Athlete, Activity
 
@@ -111,15 +111,31 @@ class Main:
 
     def load(self) -> Tuple[Dict, List[Dict]]:
         athlete = self.session.query(Athlete).first()
-        activities = (
-            self.session.query(Activity).filter_by(athlete_id=athlete.id).order_by(desc(Activity.start_date_local))
-        )
+        activities = self.session.query(Activity).filter_by(athlete_id=athlete.id).order_by(Activity.start_date_local)
 
         athlete_dict = athlete.to_dict()
         activity_list = []
 
+        streak = 0
+        last_date = None
         for activity in activities:
+            # Determinine running streak.
+            if activity.type == "Run":
+                date = datetime.datetime.strptime(activity.start_date_local, "%Y-%m-%d %H:%M:%S").date()
+                if last_date is None:
+                    streak = 1
+                elif date == last_date:
+                    pass
+                elif date == last_date + datetime.timedelta(days=1):
+                    streak += 1
+                else:
+                    assert date > last_date
+                    streak = 1
+                activity.set_streak(streak)
+                last_date = date
+            # Determine visited POIs.
             activity.set_pois(self.pois)
+            # Append to result list.
             activity_list.append(activity.to_dict())
 
         return (athlete_dict, activity_list)

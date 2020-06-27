@@ -84,6 +84,7 @@ class Activity(Base):
     summary_polyline = Column(String)
     track = Column(PickleType)
     pois = None
+    streak = None
 
     def bbox(self) -> Tuple[Optional[ValueRange], Optional[ValueRange]]:
         if self.track:
@@ -112,6 +113,9 @@ class Activity(Base):
                 self.pois = track_pois
                 return
 
+    def set_streak(self, streak: int) -> None:
+        self.streak = streak
+
     def to_dict(self) -> Dict:
         out: Dict[str, Any] = {}
         for key in ACTIVITY_KEYS:
@@ -123,6 +127,8 @@ class Activity(Base):
 
         if self.pois:
             out["pois"] = self.pois
+        if self.streak:
+            out["streak"] = self.streak
 
         return out
 

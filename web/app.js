@@ -8,7 +8,7 @@ $(function() {
 
 var App = {
     init: function(activities, athlete, last_sync) {
-        this.activities = activities;
+        this.activities = activities.reverse();
         this.added_activities = 0;
         this.athlete = athlete;
         this.filter_name = null;
@@ -401,7 +401,10 @@ var App = {
         table_items.push({icon: "far fa-question-circle", value: `<a class="type" data-type="${activity['type']}">${activity['type']}</a>`});
         table_items.push({icon: "fas fa-arrows-alt-h", value: `${(activity['distance'] / 1000).toFixed(2)} km`});
         table_items.push({icon: "fas fa-arrows-alt-v", value: `${activity['total_elevation_gain']} m`});
-        table_items.push({icon: "fas fa-stopwatch",    value: activity['moving_time']});
+        table_items.push({icon: "fas fa-stopwatch", value: activity['moving_time']});
+        if ('streak' in activity) {
+            table_items.push({icon: "fas fa-hashtag", value: `${activity['streak']}`});
+        }
         if ('pois' in activity) {
             var links = [];
             activity['pois'].forEach(category => {

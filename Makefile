@@ -13,7 +13,7 @@ format:
 	.env/bin/black activities -l 120
 
 .PHONY: lint
-lint: mypy pyline
+lint: mypy pylint
 
 .PHONY: pylint
 pylint:
