@@ -6,6 +6,15 @@ https://activities.flopp.net
 
 ![Screenshot](https://raw.githubusercontent.com/flopp/activities/master/screenshot.png "Screenshot")
 
+
+## Features
+
+- Built-in http server to authenticate with Strava.
+- Fetching of Strava activities.
+- Visited POI (predefined point-of-interest) matching.
+- Filtering by activity name, activity type, min/max distance, visited POI.
+- Running streak computation.
+
 ## Usage
 
 ### Installation
@@ -47,6 +56,25 @@ The authentication data is now saved in `auth.json` for later use.
 
 This fetches your Strava data, creates a static website, and opens a browser to view the website.
 You can also manually point a web browser of your choice to `file:///INSTALLATION_PATH/web/index.html`...
+
+### Visited POI Computation
+
+If you want to know which points-of-interest (POI), e.g. peaks of mountains, you have visited on each activity, create a JSON file containing the names and lat/lon pairs of your POI, e.g.
+
+```
+{
+    "Belchen": {"lat": 47.822496, "lon": 7.833198},
+    "Feldberg": {"lat": 47.873986, "lon": 8.004683},
+    "Hinterwaldkopf": {"lat": 47.918979, "lon": 8.016681},
+    "Kandel": {"lat": 48.062517, "lon": 8.011391},
+    "Kybfelsen": {"lat": 47.960851, "lon": 7.885071},
+    "Rosskopf": {"lat": 48.010010, "lon": 7.901702},
+    "Schauinsland": {"lat": 47.911940, "lon": 7.898506},
+    "Schönberg": {"lat": 47.954722, "lon": 7.805504} 
+}
+```
+
+Then just add the option `--poi mypoi.json` to your `.env/bin/activities` command.
 
 
 ## Made with
