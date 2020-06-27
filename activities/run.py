@@ -34,7 +34,7 @@ def run(
     browser: bool,
     force: bool,
     register: bool,
-):
+) -> None:
 
     if register:
         # Run a simple web server to get authentication data to run the sync process

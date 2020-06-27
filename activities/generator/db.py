@@ -14,7 +14,7 @@ from sqlalchemy import (
     String,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker, Session
 
 from activities.generator.valuerange import ValueRange
 
@@ -127,7 +127,7 @@ class Activity(Base):
         return out
 
 
-def init_db(db_path: str):
+def init_db(db_path: str) -> Session:
     engine = create_engine(f"sqlite:///{db_path}")
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)

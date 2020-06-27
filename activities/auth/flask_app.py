@@ -2,20 +2,21 @@ import json
 from typing import Dict
 
 import flask
+from werkzeug.wrappers import Response
 
 import stravalib  # type: ignore
 
 app = flask.Flask(__name__)
 
 
-def configure(config: Dict, authdata_file: str):
+def configure(config: Dict, authdata_file: str) -> None:
     app.config["client_id"] = config["client_id"]
     app.config["client_secret"] = config["client_secret"]
     app.config["authdata_file"] = authdata_file
 
 
 @app.route("/")
-def homepage():
+def homepage() -> str:
     client = stravalib.client.Client()
     auth_url = client.authorization_url(
         client_id=app.config["client_id"], scope=None, redirect_uri="http://localhost:5000/auth",
@@ -24,7 +25,7 @@ def homepage():
 
 
 @app.route("/auth")
-def auth_done():
+def auth_done() -> Response:
     code = flask.request.args.get("code", "")
     client = stravalib.client.Client()
     token = client.exchange_code_for_token(

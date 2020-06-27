@@ -19,23 +19,25 @@ class Main:
         self.session = init_db(db_path)
         self.pois: Optional[Dict[str, Dict]] = None
 
-    def set_strava_app_config(self, strava_app_config: Dict):
+    def set_strava_app_config(self, strava_app_config: Dict) -> None:
         for key in ["client_id", "client_secret"]:
             if key not in strava_app_config:
                 raise KeyError(f'Key "{key}" is missing from app config.')
         self.config = strava_app_config
 
-    def set_authdata(self, authdata: Dict):
+    def set_authdata(self, authdata: Dict) -> None:
         for key in ["access_token", "refresh_token", "expires_at"]:
             if key not in authdata:
                 raise KeyError(f'Key "{key}" is missing from auth data.')
         self.authdata = authdata
         self.authdata_changed = False
 
-    def set_points_of_interest(self, pois: Dict[str, Dict]):
+    def set_points_of_interest(self, pois: Dict[str, Dict]) -> None:
         self.pois = pois
 
-    def check_access(self):
+    def check_access(self) -> None:
+        assert self.authdata is not None
+        assert self.config is not None
         now = datetime.datetime.fromtimestamp(time.time())
         expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
         print(f"Access token valid until {expires_at} (now is {now})")
@@ -56,7 +58,7 @@ class Main:
         self.client.access_token = self.authdata["access_token"]
         print("Access ok")
 
-    def sync(self, force=False):
+    def sync(self, force: bool = False) -> None:
         self.check_access()
         strava_athlete = self.client.get_athlete()
 

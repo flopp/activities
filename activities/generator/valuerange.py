@@ -2,7 +2,7 @@ from typing import Optional
 
 
 class ValueRange:
-    def __init__(self):
+    def __init__(self) -> None:
         self._min: Optional[float] = None
         self._max: Optional[float] = None
 
