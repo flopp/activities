@@ -130,5 +130,5 @@ class Activity(Base):
 def init_db(db_path: str):
     engine = create_engine(f"sqlite:///{db_path}")
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    return Session()
+    session = sessionmaker(bind=engine)
+    return session()

@@ -51,11 +51,19 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=missing-docstring,locally-disabled,duplicate-code,line-too-long,
-        no-member,model-missing-unicode,no-value-for-parameter,
-        no-self-use,no-init,invalid-name,too-many-arguments,
-        missing-param-doc,missing-type-doc,
-        missing-return-doc,missing-return-type-doc
+disable=
+    bad-continuation,
+    line-too-long,
+    missing-docstring,
+    missing-param-doc,
+    missing-return-doc,
+    missing-return-type-doc,
+    missing-type-doc,
+    model-missing-unicode,
+    no-init,
+    no-member,
+    no-value-for-parameter,
+    too-many-arguments
 
 
 [REPORTS]
