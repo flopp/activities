@@ -1,6 +1,7 @@
 import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
-from geopy import distance as geopy_distance
+from geopy import distance as geopy_distance  # type: ignore
 
 from sqlalchemy import (
     create_engine,
@@ -28,11 +29,13 @@ class Athlete(Base):
     firstname = Column(String)
     lastname = Column(String)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         return {"id": self.id, "firstname": self.firstname, "lastname": self.lastname}
 
 
-def is_point_on_track(point, track, max_distance_meters=100):
+def is_point_on_track(
+    point: Tuple[float, float], track: List[Tuple[float, float]], max_distance_meters: float = 100
+) -> bool:
     point_lat, point_lon = point
     for coordinates in track:
         lat, lon = coordinates
@@ -82,7 +85,7 @@ class Activity(Base):
     track = Column(PickleType)
     pois = None
 
-    def bbox(self):
+    def bbox(self) -> Tuple[Optional[ValueRange], Optional[ValueRange]]:
         if self.track:
             lat_range = ValueRange()
             lon_range = ValueRange()
@@ -92,9 +95,11 @@ class Activity(Base):
             return lat_range, lon_range
         return None, None
 
-    def set_pois(self, pois):
+    def set_pois(self, pois: Dict[str, Dict]) -> None:
         if self.track and pois:
             lat_range, lon_range = self.bbox()
+            if lat_range is None or lon_range is None:
+                return
             track_pois = []
             for (name, point) in pois.items():
                 lat, lon = point["lat"], point["lon"]
@@ -107,8 +112,8 @@ class Activity(Base):
                 self.pois = track_pois
                 return
 
-    def to_dict(self):
-        out = {}
+    def to_dict(self) -> Dict:
+        out: Dict[str, Any] = {}
         for key in ACTIVITY_KEYS:
             attr = getattr(self, key)
             if isinstance(attr, (datetime.timedelta, datetime.datetime)):
@@ -122,7 +127,7 @@ class Activity(Base):
         return out
 
 
-def init_db(db_path):
+def init_db(db_path: str):
     engine = create_engine(f"sqlite:///{db_path}")
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)

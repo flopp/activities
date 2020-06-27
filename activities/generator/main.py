@@ -1,37 +1,38 @@
 import datetime
 import time
 import sys
+from typing import Dict, List, Optional, Tuple
 
-import polyline
-import stravalib
+import polyline  # type: ignore
+import stravalib  # type: ignore
 from sqlalchemy import func, desc
 
 from activities.generator.db import init_db, Athlete, Activity
 
 
 class Main:
-    def __init__(self, db_path):
-        self.config = None
-        self.authdata = None
+    def __init__(self, db_path: str):
+        self.config: Optional[Dict] = None
+        self.authdata: Optional[Dict] = None
         self.authdata_changed = False
         self.client = stravalib.Client()
         self.session = init_db(db_path)
-        self.pois = None
+        self.pois: Optional[Dict[str, Dict]] = None
 
-    def set_strava_app_config(self, strava_app_config):
+    def set_strava_app_config(self, strava_app_config: Dict):
         for key in ["client_id", "client_secret"]:
             if key not in strava_app_config:
                 raise KeyError(f'Key "{key}" is missing from app config.')
         self.config = strava_app_config
 
-    def set_authdata(self, authdata):
+    def set_authdata(self, authdata: Dict):
         for key in ["access_token", "refresh_token", "expires_at"]:
             if key not in authdata:
                 raise KeyError(f'Key "{key}" is missing from auth data.')
         self.authdata = authdata
         self.authdata_changed = False
 
-    def set_points_of_interest(self, pois):
+    def set_points_of_interest(self, pois: Dict[str, Dict]):
         self.pois = pois
 
     def check_access(self):
@@ -106,7 +107,7 @@ class Main:
 
         self.session.commit()
 
-    def load(self):
+    def load(self) -> Tuple[Dict, List[Dict]]:
         athlete = self.session.query(Athlete).first()
         activities = (
             self.session.query(Activity).filter_by(athlete_id=athlete.id).order_by(desc(Activity.start_date_local))

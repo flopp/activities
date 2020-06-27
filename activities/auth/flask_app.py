@@ -1,14 +1,14 @@
-#!/usr/bin/env python
 import json
+from typing import Dict
 
 import flask
 
-import stravalib
+import stravalib  # type: ignore
 
 app = flask.Flask(__name__)
 
 
-def configure(config, authdata_file):
+def configure(config: Dict, authdata_file: str):
     app.config["client_id"] = config["client_id"]
     app.config["client_secret"] = config["client_secret"]
     app.config["authdata_file"] = authdata_file

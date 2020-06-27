@@ -24,7 +24,17 @@ HTTP_PORT = 5000
 @click.option("-o", "--output", default="web/activities.js", metavar="JS_FILE", type=click.Path())
 @click.option("-b", "--browser", is_flag=True, help="Open the generated website in a web browser.")
 @click.option("-f", "--force", is_flag=True, help="Force sync for older activities than the last synced.")
-def run(config, authdata, pois, data, output, sync, browser, force, register):
+def run(
+    config: str,
+    authdata: str,
+    pois: str,
+    data: str,
+    output: str,
+    sync: bool,
+    browser: bool,
+    force: bool,
+    register: bool,
+):
 
     if register:
         # Run a simple web server to get authentication data to run the sync process

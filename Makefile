@@ -13,9 +13,15 @@ format:
 	.env/bin/black activities -l 120
 
 .PHONY: lint
-lint:
+lint: mypy pyline
+
+.PHONY: pylint
+pylint:
 	.env/bin/pylint activities
 
+.PHONY: mypy
+mypy:
+	PYTHONPATH=. .env/bin/mypy activities
 
 .PHONY: auth
 auth:
