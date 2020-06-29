@@ -57,6 +57,7 @@ disable=
     no-init,
     no-member,
     no-value-for-parameter,
+    too-few-public-methods,
     too-many-arguments
 
 
