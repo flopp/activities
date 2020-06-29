@@ -36,7 +36,7 @@ var App = {
         this.toggleSidebar("sidebar-activities");
         this.loadActivity(activity_id);
         this.filterActivities('', 'All', 'All', 0, this.max_distance);
-        $('#no-activities-message').hide();
+        document.querySelector("#no-activities-message").style.display = "none";
         $('#last-sync').text(`Last Sync: ${last_sync}`);
         if (this.athlete) {
             $('#strava-button').attr('href', `https://www.strava.com/athletes/${this.athlete["id"]}`);
@@ -205,15 +205,17 @@ var App = {
 
     loadActivity: function(id) {
         this.selected_activity = id;
-        $('.activity').removeClass('is-info');
+        document.querySelectorAll('.activity').forEach(div => {
+            div.classList.remove('is-info');
+        });
         if (id === null) {
             window.location.hash = "#";
             this.displayPolyline(null);
         } else {
             window.location.hash = `#${id}`;
-            const activity_div = $(`.activity[data-id="${id}"]`);
-            activity_div.addClass('is-info');
-            activity_div[0].scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
+            const activity_div = document.querySelector(`.activity[data-id="${id}"]`);
+            activity_div.classList.add('is-info');
+            activity_div.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
             var polyline = null;
             const activity = this.getActivity(id);
             if (activity !== undefined) {
@@ -319,19 +321,21 @@ var App = {
         $('#filter-type').val(type);
         $('#filter-category').val(category);
         document.getElementById('filter-distance').noUiSlider.set([min_distance, max_distance]);
-        console.log("distance", min_distance, max_distance)
         var self = this;
         var first_activity = null;
         var selected_found = false;
 
         var count = 0;
         this.activities.forEach(item => {
-            const activity_id = item['strava_id'];
-            const div = $(`.activity[data-id="${activity_id}"]`);
+            const activity_id = item['strava_id']
+            const div = document.querySelector(`.activity[data-id="${activity_id}"]`);
+            if (!div) {
+                return;
+            }
             if (!self.matchesFilter(item)) {
-                div.hide();
+                div.style.display = "none";
             } else {
-                div.show();
+                div.style.display = "block";
                 if (!first_activity) {
                     first_activity = activity_id;
                 }
@@ -344,9 +348,9 @@ var App = {
 
         $('#filter-matches').text(`${count} / ${this.activities.length}`);
         if (count === 0) {
-            $('#no-activities-message').show();
+            document.querySelector('#no-activities-message').style.display = "block";
         } else {
-            $('#no-activities-message').hide();
+            document.querySelector('#no-activities-message').style.display = "none";
         }
 
         if (selected_found) {
