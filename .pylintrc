@@ -53,13 +53,7 @@ confidence=
 # --disable=W"
 disable=
     bad-continuation,
-    line-too-long,
     missing-docstring,
-    missing-param-doc,
-    missing-return-doc,
-    missing-return-type-doc,
-    missing-type-doc,
-    model-missing-unicode,
     no-init,
     no-member,
     no-value-for-parameter,
@@ -142,7 +136,7 @@ callbacks=cb_,_cb
 [FORMAT]
 
 # Maximum number of characters on a single line.
-max-line-length=100
+max-line-length=120
 
 # Regexp for a line that is allowed to be longer than the limit.
 ignore-long-lines=^\s*(# )?<?https?://\S+>?$
