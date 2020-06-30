@@ -36,20 +36,16 @@ python3 -m venv .env
 
 ```
 .env/bin/activities \
-    --config config.json \
-    --authdata auth.json \
     --register
 ```
 
 Now a web browser window should open with an "Authenticate with Strava" button. If not, manually open `localhost:5000` in a web browser of your choice. Click "Authenticate with Strava". Allow access for the app.
-The authentication data is now saved in `auth.json` for later use.
+The authentication data is now saved in `data.db` for later use.
 
 ### Sync
 
 ```
 .env/bin/activities \
-    --config config.json \
-    --authdata auth.json \
     --sync \
     ---browser
 ```
@@ -70,7 +66,7 @@ If you want to know which points-of-interest (POI), e.g. peaks of mountains, you
     "Kybfelsen": {"lat": 47.960851, "lon": 7.885071},
     "Rosskopf": {"lat": 48.010010, "lon": 7.901702},
     "Schauinsland": {"lat": 47.911940, "lon": 7.898506},
-    "Schönberg": {"lat": 47.954722, "lon": 7.805504} 
+    "Schönberg": {"lat": 47.954722, "lon": 7.805504}
 }
 ```
 
