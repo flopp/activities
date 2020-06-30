@@ -13,6 +13,17 @@ import activities.generator.main as generator_app
 HTTP_PORT = 5000
 
 
+def run_auth_app(config: str, data: str) -> None:
+    # Run a simple web server to get authentication data to run the sync process
+    # Read from config.json file and output to account.json
+    with open(config) as f:
+        config_content = json.load(f)
+
+    auth_app.configure(config_content, data)
+    click.launch(f"http://127.0.0.1:{HTTP_PORT}/")
+    auth_app.app.run(port=HTTP_PORT, debug=True)
+
+
 @click.command()
 @click.option("-c", "--config", default="config.json", metavar="JSON_FILE", type=click.Path(exists=True))
 @click.option("-r", "--register", is_flag=True, help="Register Strava account.")
@@ -27,27 +38,14 @@ def run(
 ) -> None:
 
     if register:
-        # Run a simple web server to get authentication data to run the sync process
-        # Read from config.json file and output to account.json
-        with open(config) as f:
-            config_content = json.load(f)
-
-        auth_app.configure(config_content, data)
-        click.launch(f"http://127.0.0.1:{HTTP_PORT}/")
-        auth_app.app.run(port=HTTP_PORT, debug=True)
+        run_auth_app(config, data)
+        return
 
     # Drop DB if sync and force mode enabled
     if sync and force:
         os.remove(data)
 
-    main = generator_app.Main(data)
-
-    with open(config) as f:
-        main.set_strava_app_config(json.load(f))
-
-    if pois:
-        with open(pois) as f:
-            main.set_points_of_interest(json.load(f))
+    main = generator_app.Main(data, config, pois)
 
     if sync:
         main.sync(force)

@@ -1,7 +1,8 @@
 import datetime
+import json
 import time
 import sys
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import polyline  # type: ignore
 import stravalib  # type: ignore
@@ -11,11 +12,25 @@ from activities.generator.db import init_db, Athlete, Activity, Auth
 
 
 class Main:
-    def __init__(self, db_path: str):
-        self.config: Optional[Dict] = None
+    def __init__(self, db_path: str, strava_config_path: str, pois_data_path: str):
         self.client = stravalib.Client()
         self.session = init_db(db_path)
-        self.pois: Optional[Dict[str, Dict]] = None
+
+        # Load the strava account configuration
+        with open(strava_config_path) as f:
+            strava_config = json.load(f)
+            if not {"client_id", "client_secret"} <= strava_config.keys():
+                raise KeyError("Missing keys from strava configuration.")
+
+        self.client_id = strava_config["client_id"]
+        self.client_secret = strava_config["client_secret"]
+
+        # Load the POIs
+        if pois_data_path:
+            with open(pois_data_path) as f:
+                self.pois = json.load(f)
+        else:
+            self.pois = None
 
         auth = self.session.query(Auth).first()
         if not auth:
@@ -24,27 +39,15 @@ class Main:
         self.authdata = auth
         self.authdata_changed = False
 
-    def set_strava_app_config(self, strava_app_config: Dict) -> None:
-        for key in ["client_id", "client_secret"]:
-            if key not in strava_app_config:
-                raise KeyError(f'Key "{key}" is missing from app config.')
-        self.config = strava_app_config
-
-    def set_points_of_interest(self, pois: Dict[str, Dict]) -> None:
-        self.pois = pois
-
     def check_access(self) -> None:
         assert self.authdata is not None
-        assert self.config is not None
         now = datetime.datetime.fromtimestamp(time.time())
         expires_at = self.authdata.expires_at
         print(f"Access token valid until {expires_at} (now is {now})")
         if now + datetime.timedelta(minutes=5) >= expires_at:
             print("Refreshing access token")
             response = self.client.refresh_access_token(
-                client_id=self.config["client_id"],
-                client_secret=self.config["client_secret"],
-                refresh_token=self.authdata.refresh_token,
+                client_id=self.client_id, client_secret=self.client_secret, refresh_token=self.authdata.refresh_token,
             )
             # Update the authdata object
             self.authdata.access_token = response["access_token"]
@@ -131,11 +134,11 @@ class Main:
                 else:
                     assert date > last_date
                     streak = 1
-                activity.set_streak(streak)
+                activity.streak = streak
                 last_date = date
             # Determine visited POIs.
             activity.set_pois(self.pois)
             # Append to result list.
             activity_list.append(activity.to_dict())
 
-        return (athlete_dict, activity_list)
+        return athlete_dict, activity_list

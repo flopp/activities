@@ -122,9 +122,6 @@ class Activity(Base):
                 self.pois = track_pois
                 return
 
-    def set_streak(self, streak: int) -> None:
-        self.streak = streak
-
     def to_dict(self) -> Dict:
         out: Dict[str, Any] = {}
         for key in ACTIVITY_KEYS:
