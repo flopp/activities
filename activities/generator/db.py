@@ -143,7 +143,7 @@ class Activity(Base):
 
 
 def init_db(db_path: str) -> Session:
-    engine = create_engine(f"sqlite:///{db_path}",  connect_args={"check_same_thread": False})
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)
     return session()
