@@ -39,7 +39,7 @@ var App = {
         document.querySelector("#no-activities-message").style.display = "none";
         $('#last-sync').text(`Last Sync: ${last_sync}`);
         if (this.athlete) {
-            $('#strava-button').attr('href', `https://www.strava.com/athletes/${this.athlete["id"]}`);
+            document.querySelector("#strava-button").href = `https://www.strava.com/athletes/${this.athlete["id"]}`;
         }
 
     },
@@ -317,9 +317,9 @@ var App = {
         this.filter_category = category;
         this.filter_min_distance = min_distance;
         this.filter_max_distance = max_distance;
-        $('#filter-name').val(name);
-        $('#filter-type').val(type);
-        $('#filter-category').val(category);
+        document.querySelector('#filter-name').value = name;
+        document.querySelector(`#filter-type [value="${type}"]`).selected = true;
+        document.querySelector(`#filter-category [value="${category}"]`).selected = true;
         document.getElementById('filter-distance').noUiSlider.set([min_distance, max_distance]);
         var self = this;
         var first_activity = null;
@@ -329,13 +329,12 @@ var App = {
         this.activities.forEach(item => {
             const activity_id = item['strava_id']
             const div = document.querySelector(`.activity[data-id="${activity_id}"]`);
-            if (!div) {
-                return;
+            const match = self.matchesFilter(item);
+
+            if (div) {
+                div.style.display = match ? "block" : "none";
             }
-            if (!self.matchesFilter(item)) {
-                div.style.display = "none";
-            } else {
-                div.style.display = "block";
+            if (match) {
                 if (!first_activity) {
                     first_activity = activity_id;
                 }
@@ -346,12 +345,8 @@ var App = {
             }
         });
 
-        $('#filter-matches').text(`${count} / ${this.activities.length}`);
-        if (count === 0) {
-            document.querySelector('#no-activities-message').style.display = "block";
-        } else {
-            document.querySelector('#no-activities-message').style.display = "none";
-        }
+        document.querySelector('#filter-matches').textContent = `${count} / ${this.activities.length}`;
+        document.querySelector('#no-activities-message').style.display = (count === 0) ? "block" : "none";
 
         if (selected_found) {
             this.loadActivity(this.selected_activity);
@@ -369,7 +364,8 @@ var App = {
         var idFound = false;
         this.activities.forEach(activity => {
             const activity_id = activity['strava_id'];
-            if ($(`.activity[data-id="${activity_id}"]`).length > 0) {
+            const div = document.querySelector(`.activity[data-id="${activity_id}"]`);
+            if (div) {
                 return;
             }
             if (activity_id == search_id) {
@@ -436,10 +432,10 @@ var App = {
 
     toggleSidebar: function(id) {
         if (!id || document.getElementById(id).classList.contains("active")) {
-            document.getElementById("sidebar").classList.remove("sidebar-open");
-            document.getElementById("sidebar-controls").classList.remove("sidebar-open");
-            document.getElementById("bottombar").classList.remove("sidebar-open");
-            document.getElementById("map").classList.remove("sidebar-open");
+            document.querySelector("#sidebar").classList.remove("sidebar-open");
+            document.querySelector("#sidebar-controls").classList.remove("sidebar-open");
+            document.querySelector("#bottombar").classList.remove("sidebar-open");
+            document.querySelector("#map").classList.remove("sidebar-open");
             document.querySelectorAll(".sidebar-control").forEach(control => {
                 const container_id = control.dataset.container;
                 const container = document.getElementById(container_id);
@@ -447,10 +443,10 @@ var App = {
                 container.classList.remove("active");
             });
         } else {
-            document.getElementById("sidebar").classList.add("sidebar-open");
-            document.getElementById("sidebar-controls").classList.add("sidebar-open");
-            document.getElementById("bottombar").classList.add("sidebar-open");
-            document.getElementById("map").classList.add("sidebar-open");
+            document.querySelector("#sidebar").classList.add("sidebar-open");
+            document.querySelector("#sidebar-controls").classList.add("sidebar-open");
+            document.querySelector("#bottombar").classList.add("sidebar-open");
+            document.querySelector("#map").classList.add("sidebar-open");
             document.querySelectorAll(".sidebar-control").forEach(control => {
                 const container_id = control.dataset.container;
                 const container = document.getElementById(container_id);
@@ -464,10 +460,10 @@ var App = {
             });
 
             if (id == "sidebar-activities") {
-                const activity_div = $(`.activity[data-id="${this.selected_activity}"]`);
-                activity_div.addClass('is-info');
-                if (activity_div.length > 0) {
-                    activity_div[0].scrollIntoView({
+                const activity_div = document.querySelector(`.activity[data-id="${this.selected_activity}"]`);
+                if (activity_div) {
+                    activity_div.classList.add('is-info');
+                    activity_div.scrollIntoView({
                         behavior: "smooth",
                         block: "nearest",
                         inline: "nearest"
