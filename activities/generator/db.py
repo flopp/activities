@@ -5,9 +5,10 @@ from geopy import distance as geopy_distance  # type: ignore
 
 from sqlalchemy import (
     create_engine,
-    ForeignKey,
     Column,
+    DateTime,
     Float,
+    ForeignKey,
     Integer,
     Interval,
     PickleType,
@@ -20,6 +21,14 @@ from activities.generator.valuerange import ValueRange
 
 
 Base = declarative_base()
+
+
+class Auth(Base):
+    __tablename__ = "auth"
+
+    access_token = Column(String, primary_key=True)
+    refresh_token = Column(String)
+    expires_at = Column(DateTime)
 
 
 class Athlete(Base):
@@ -134,7 +143,7 @@ class Activity(Base):
 
 
 def init_db(db_path: str) -> Session:
-    engine = create_engine(f"sqlite:///{db_path}")
+    engine = create_engine(f"sqlite:///{db_path}",  connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)
     return session()

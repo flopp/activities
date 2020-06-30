@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Authentication</title>
+        <title>Authentication complete</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css">
     </head>
@@ -13,19 +13,12 @@
             <div class="container">
                 <article class="message is-dark">
                     <div class="message-header">
-                        <p>Authenticate</p>
+                        <p>Authenticate complete</p>
                     </div>
                     <div class="message-body">
                         <p>
-                            The app needs a valid authentication token for Strava in order to access your activities.
+                            You are now ready to sync activities.
                         </p>
-                        <p>
-                            Clicking the button forwards you to Strava's authentication page, where you can grant access for the app.
-                        </p>
-                        <p>
-                            On success, the authentication token will be stored in <code>{{ authdata_file }}</code> for later use.
-                        </p>
-                        <p><br/><a href="{{ auth_url }}" class="button is-danger">Authenticate with Strava</a></p>
                     </div>
                 </article>
             </div>

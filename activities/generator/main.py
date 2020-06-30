@@ -7,30 +7,28 @@ import polyline  # type: ignore
 import stravalib  # type: ignore
 from sqlalchemy import func
 
-from activities.generator.db import init_db, Athlete, Activity
+from activities.generator.db import init_db, Athlete, Activity, Auth
 
 
 class Main:
     def __init__(self, db_path: str):
         self.config: Optional[Dict] = None
-        self.authdata: Optional[Dict] = None
-        self.authdata_changed = False
         self.client = stravalib.Client()
         self.session = init_db(db_path)
         self.pois: Optional[Dict[str, Dict]] = None
+
+        auth = self.session.query(Auth).first()
+        if not auth:
+            raise Exception("Missing auth data in DB.")
+
+        self.authdata = auth
+        self.authdata_changed = False
 
     def set_strava_app_config(self, strava_app_config: Dict) -> None:
         for key in ["client_id", "client_secret"]:
             if key not in strava_app_config:
                 raise KeyError(f'Key "{key}" is missing from app config.')
         self.config = strava_app_config
-
-    def set_authdata(self, authdata: Dict) -> None:
-        for key in ["access_token", "refresh_token", "expires_at"]:
-            if key not in authdata:
-                raise KeyError(f'Key "{key}" is missing from auth data.')
-        self.authdata = authdata
-        self.authdata_changed = False
 
     def set_points_of_interest(self, pois: Dict[str, Dict]) -> None:
         self.pois = pois
@@ -39,23 +37,25 @@ class Main:
         assert self.authdata is not None
         assert self.config is not None
         now = datetime.datetime.fromtimestamp(time.time())
-        expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
+        expires_at = self.authdata.expires_at
         print(f"Access token valid until {expires_at} (now is {now})")
         if now + datetime.timedelta(minutes=5) >= expires_at:
             print("Refreshing access token")
             response = self.client.refresh_access_token(
                 client_id=self.config["client_id"],
                 client_secret=self.config["client_secret"],
-                refresh_token=self.authdata["refresh_token"],
+                refresh_token=self.authdata.refresh_token,
             )
-            self.authdata["access_token"] = response["access_token"]
-            self.authdata["refresh_token"] = response["refresh_token"]
-            self.authdata["expires_at"] = response["expires_at"]
-            expires_at = datetime.datetime.fromtimestamp(self.authdata["expires_at"])
+            # Update the authdata object
+            self.authdata.access_token = response["access_token"]
+            self.authdata.refresh_token = response["refresh_token"]
+            self.authdata.expires_at = datetime.datetime.fromtimestamp(response["expires_at"])
+            self.session.commit()
+
             print(f"New access token will expire at {expires_at}")
             self.authdata_changed = True
 
-        self.client.access_token = self.authdata["access_token"]
+        self.client.access_token = self.authdata.access_token
         print("Access ok")
 
     def sync(self, force: bool = False) -> None:
