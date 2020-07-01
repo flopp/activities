@@ -7,7 +7,7 @@ import os
 import click
 
 import activities.auth.flask_app as auth_app
-import activities.generator.main as generator_app
+from activities.generator import Generator
 
 
 HTTP_PORT = 5000
@@ -45,12 +45,12 @@ def run(
     if sync and force:
         os.remove(data)
 
-    main = generator_app.Main(data, config, pois)
+    generator = Generator(data, config, pois)
 
     if sync:
-        main.sync(force)
+        generator.sync(force)
 
-    athlete, activities_list = main.load()
+    athlete, activities_list = generator.load()
     with open(output, "w") as f:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"const the_last_sync = '{now}';\n")
