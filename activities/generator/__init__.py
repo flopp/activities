@@ -4,11 +4,11 @@ import time
 import sys
 from typing import Dict, List, Tuple
 
-import polyline  # type: ignore
+import arrow  # type: ignore
 import stravalib  # type: ignore
 from sqlalchemy import func
 
-from activities.generator.db import init_db, Athlete, Activity, Auth
+from activities.generator.db import init_db, update_or_create_activity, Athlete, Activity, Auth
 
 
 class Generator:
@@ -77,38 +77,18 @@ class Generator:
         if force:
             filters = {"before": datetime.datetime.utcnow()}
         else:
-            last_activity_date = self.session.query(func.max(Activity.start_date)).scalar()
+            last_activity_date = arrow.get(self.session.query(func.max(Activity.start_date)).scalar())
+            last_activity_date = last_activity_date.shift(days=-7)
 
-            filters = {"after": last_activity_date}
+            filters = {"after": last_activity_date.datetime}
 
         for strava_activity in self.client.get_activities(**filters):
-            sys.stdout.write(".")
+            created = update_or_create_activity(self.session, athlete, strava_activity)
+            if created:
+                sys.stdout.write("+")
+            else:
+                sys.stdout.write(".")
             sys.stdout.flush()
-
-            activity = self.session.query(Activity).filter_by(strava_id=strava_activity.id).first()
-            if not activity:
-                activity = Activity(
-                    strava_id=strava_activity.id,
-                    athlete=athlete,
-                    name=strava_activity.name,
-                    distance=strava_activity.distance,
-                    moving_time=strava_activity.moving_time,
-                    elapsed_time=strava_activity.elapsed_time,
-                    total_elevation_gain=strava_activity.total_elevation_gain,
-                    type=strava_activity.type,
-                    start_date=strava_activity.start_date,
-                    start_date_local=strava_activity.start_date_local,
-                    location_country=strava_activity.location_country,
-                )
-
-                try:
-                    decoded = polyline.decode(strava_activity.map.summary_polyline)
-                    activity.summary_polyline = strava_activity.map.summary_polyline
-                    if decoded:
-                        activity.track = decoded
-                except (AttributeError, TypeError):
-                    continue
-                self.session.add(activity)
 
         self.session.commit()
 
