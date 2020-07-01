@@ -26,7 +26,8 @@ def run_auth_app(config: str, data: str) -> None:
 
 @click.command()
 @click.option("-c", "--config", default="config.json", metavar="JSON_FILE", type=click.Path(exists=True))
-@click.option("-r", "--register", is_flag=True, help="Register Strava account.")
+@click.option("-r", "--reset", is_flag=True, help="Reset database.")
+@click.option("-a", "--auth", is_flag=True, help="Authenticate with Strava.")
 @click.option("-s", "--sync", is_flag=True, help="Sync activities.")
 @click.option("-p", "--pois", metavar="JSON_FILE", type=click.Path())
 @click.option("-d", "--data", default="data.db", metavar="DATA_FILE", type=click.Path())
@@ -34,16 +35,17 @@ def run_auth_app(config: str, data: str) -> None:
 @click.option("-b", "--browser", is_flag=True, help="Open the generated website in a web browser.")
 @click.option("-f", "--force", is_flag=True, help="Force sync for older activities than the last synced.")
 def run(
-    config: str, pois: str, data: str, output: str, sync: bool, browser: bool, force: bool, register: bool,
+    config: str, pois: str, data: str, output: str, sync: bool, browser: bool, force: bool, reset: bool, auth: bool,
 ) -> None:
 
-    if register:
-        run_auth_app(config, data)
+    # Drop DB if reset option is set
+    if reset:
+        os.remove(data)
         return
 
-    # Drop DB if sync and force mode enabled
-    if sync and force:
-        os.remove(data)
+    if auth:
+        run_auth_app(config, data)
+        return
 
     generator = Generator(data, config, pois)
 

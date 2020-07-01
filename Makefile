@@ -25,7 +25,7 @@ mypy:
 
 .PHONY: auth
 auth:
-	PYTHONPATH=. .env/bin/python activities/run.py --register
+	PYTHONPATH=. .env/bin/python activities/run.py --auth
 
 .PHONY: run
 run:

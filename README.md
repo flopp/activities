@@ -36,7 +36,7 @@ python3 -m venv .env
 
 ```
 .env/bin/activities \
-    --register
+    --auth
 ```
 
 Now a web browser window should open with an "Authenticate with Strava" button. If not, manually open `localhost:5000` in a web browser of your choice. Click "Authenticate with Strava". Allow access for the app.
