@@ -1,2 +1,4 @@
 include requirements.txt
 include requirements-dev.txt
+
+recursive-include activities/auth/templates *
