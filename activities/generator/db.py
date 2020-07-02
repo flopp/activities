@@ -2,7 +2,7 @@ import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from geopy import distance as geopy_distance  # type: ignore
-
+import polyline  # type: ignore
 from sqlalchemy import (
     create_engine,
     Column,
@@ -16,6 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker, Session
+from stravalib.model import Activity as StravaActivity  # type: ignore
 
 from activities.generator.valuerange import ValueRange
 
@@ -137,6 +138,45 @@ class Activity(Base):
             out["streak"] = self.streak
 
         return out
+
+
+def update_or_create_activity(session: Session, athlete: Athlete, strava_activity: StravaActivity) -> bool:
+    created = False
+
+    activity: Optional[Activity] = session.query(Activity).filter_by(strava_id=strava_activity.id).first()
+    if not activity:
+        activity = Activity(
+            strava_id=strava_activity.id,
+            athlete=athlete,
+            name=strava_activity.name,
+            distance=strava_activity.distance,
+            moving_time=strava_activity.moving_time,
+            elapsed_time=strava_activity.elapsed_time,
+            total_elevation_gain=strava_activity.total_elevation_gain,
+            type=strava_activity.type,
+            start_date=strava_activity.start_date,
+            start_date_local=strava_activity.start_date_local,
+            location_country=strava_activity.location_country,
+        )
+        session.add(activity)
+        created = True
+    else:
+        activity.name = strava_activity.name
+        activity.distance = float(strava_activity.distance)
+        activity.moving_time = strava_activity.moving_time
+        activity.elapsed_time = strava_activity.elapsed_time
+        activity.total_elevation_gain = float(strava_activity.total_elevation_gain)
+        activity.type = strava_activity.type
+
+    try:
+        decoded = polyline.decode(strava_activity.map.summary_polyline)
+        activity.summary_polyline = strava_activity.map.summary_polyline
+        if decoded:
+            activity.track = decoded
+    except (AttributeError, TypeError):
+        pass
+
+    return created
 
 
 def init_db(db_path: str) -> Session:
