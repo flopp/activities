@@ -20,7 +20,22 @@ var App = {
         this.selected_activity = null;
         this.map = this.initMap();
         this.track = null;
+        this.start_point = null;
+        this.end_point = null;
         this.initEventHandlers();
+
+        this.start_icon = L.AwesomeMarkers.icon({
+            prefix: 'fa',
+            extraClasses: 'fas',
+            icon: 'play',
+            markerColor: 'green'
+        });
+        this.end_icon = L.AwesomeMarkers.icon({
+            prefix: 'fa',
+            extraClasses: 'fas',
+            icon: 'stop',
+            markerColor: 'red'
+        });
 
         var activity_id = null;
         const regex = /^#(\d+)$/;
@@ -186,9 +201,21 @@ var App = {
             this.track.remove();
             this.track = null;
         }
+        if (this.start_point) {
+            this.start_point.remove();
+            this.start_point = null;
+        }
+        if (this.end_point) {
+            this.end_point.remove();
+            this.end_point = null;
+        }
         if (polyline !== null && polyline !== '') {
             const decoded = L.PolylineUtil.decode(polyline);
             this.track = L.polyline(decoded).addTo(this.map);
+            if (decoded.length > 0) {
+                this.start_point = L.marker(decoded[0], {icon: this.start_icon}).addTo(this.map);
+                this.end_point = L.marker(decoded.slice(-1)[0], {icon: this.end_icon}).addTo(this.map);
+            }
             this.map.fitBounds(this.track.getBounds());
         }
     },

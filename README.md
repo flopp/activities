@@ -80,10 +80,11 @@ Then just add the option `--poi mypoi.json` to your `.env/bin/activities` comman
 - [Flask](https://flask.palletsprojects.com/)
 - [geopy](https://github.com/geopy/geopy)
 - [jQuery](https://jquery.com/)
-- [Leaflet.encoded](https://github.com/jieter/Leaflet.encoded)
 - [Leaflet](https://leafletjs.com/)
-- [polyline](https://github.com/hicsail/polyline)
+- [Leaflet.awesome-markers](https://github.com/lvoogdt/Leaflet.awesome-markers)
+- [Leaflet.encoded](https://github.com/jieter/Leaflet.encoded)
 - [noUiSlider](https://refreshless.com/nouislider/)
+- [polyline](https://github.com/hicsail/polyline)
 - [SQLAlchemy](https://www.sqlalchemy.org)
 - [Stravalib](https://github.com/hozn/stravalib)
 
