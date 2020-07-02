@@ -12,7 +12,7 @@ from activities.generator.db import init_db, update_or_create_activity, Athlete,
 
 
 class Generator:
-    def __init__(self, db_path: str, strava_config_path: str, pois_data_path: str):
+    def __init__(self, strava_config_path: str, db_path: str, pois_data_path: str):
         self.client = stravalib.Client()
         self.session = init_db(db_path)
 
@@ -77,10 +77,13 @@ class Generator:
         if force:
             filters = {"before": datetime.datetime.utcnow()}
         else:
-            last_activity_date = arrow.get(self.session.query(func.max(Activity.start_date)).scalar())
-            last_activity_date = last_activity_date.shift(days=-7)
-
-            filters = {"after": last_activity_date.datetime}
+            last_activity = self.session.query(func.max(Activity.start_date)).scalar()
+            if last_activity:
+                last_activity_date = arrow.get(last_activity)
+                last_activity_date = last_activity_date.shift(days=-7)
+                filters = {"after": last_activity_date.datetime}
+            else:
+                filters = {"before": datetime.datetime.utcnow()}
 
         for strava_activity in self.client.get_activities(**filters):
             created = update_or_create_activity(self.session, athlete, strava_activity)

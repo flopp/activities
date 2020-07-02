@@ -13,13 +13,10 @@ from activities.generator import Generator
 HTTP_PORT = 5000
 
 
-def run_auth_app(config: str, data: str) -> None:
+def run_auth_app(config: str, data: str, pois: str) -> None:
     # Run a simple web server to get authentication data to run the sync process
     # Read from config.json file and output to account.json
-    with open(config) as f:
-        config_content = json.load(f)
-
-    auth_app.configure(config_content, data)
+    auth_app.configure(config, data, pois)
     click.launch(f"http://127.0.0.1:{HTTP_PORT}/")
     auth_app.app.run(port=HTTP_PORT, debug=True)
 
@@ -44,10 +41,10 @@ def run(
         return
 
     if auth:
-        run_auth_app(config, data)
+        run_auth_app(config, data, pois)
         return
 
-    generator = Generator(data, config, pois)
+    generator = Generator(config, data, pois)
 
     if sync:
         generator.sync(force)
