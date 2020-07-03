@@ -24,17 +24,17 @@ var App = {
         this.end_point = null;
         this.initEventHandlers();
 
-        this.start_icon = L.AwesomeMarkers.icon({
-            prefix: 'fa',
-            extraClasses: 'fas',
-            icon: 'play',
-            markerColor: 'green'
+        this.start_icon = L.BeautifyIcon.icon({
+            icon: 'play-circle',
+            iconShape: 'circle',
+            borderColor: 'green',
+            textColor: 'green'
         });
-        this.end_icon = L.AwesomeMarkers.icon({
-            prefix: 'fa',
-            extraClasses: 'fas',
-            icon: 'stop',
-            markerColor: 'red'
+        this.end_icon = L.BeautifyIcon.icon({
+            icon: 'stop-circle',
+            iconShape: 'circle',
+            borderColor: 'red',
+            textColor: 'red'
         });
 
         var activity_id = null;
@@ -68,7 +68,8 @@ var App = {
         const map = L.map('map', {
             center: [48, 8],
             zoom: 13,
-            layers: [openstreetmap]
+            layers: [openstreetmap],
+            zoomSnap: 0.33
         });
 
         L.control.layers({"OpenStreetMap": openstreetmap, "OpenTopoMap": opentopomap}, {}).addTo(map);
@@ -120,15 +121,15 @@ var App = {
                 self.filterActivities(
                     self.filter_name, self.filter_type, category, self.filter_min_distance, self.filter_max_distance);
             });
-        
+
         document.querySelectorAll(".sidebar-control").forEach(control => {
             const container_id = control.dataset.container;
             const container = document.getElementById(container_id);
-        
+
             container.querySelector(".header > .close").onclick = event => {
                 self.toggleSidebar(null);
             };
-    
+
             const a = control.getElementsByTagName("a")[0];
             a.onclick = event => {
                 self.toggleSidebar(container_id);
@@ -211,7 +212,10 @@ var App = {
         }
         if (polyline !== null && polyline !== '') {
             const decoded = L.PolylineUtil.decode(polyline);
-            this.track = L.polyline(decoded).addTo(this.map);
+            this.track = L.polyline(decoded, {
+                color: 'red',
+                distanceMarkers: {iconSize: [20, 14] },
+           }).addTo(this.map);
             if (decoded.length > 0) {
                 this.start_point = L.marker(decoded[0], {icon: this.start_icon}).addTo(this.map);
                 this.end_point = L.marker(decoded.slice(-1)[0], {icon: this.end_icon}).addTo(this.map);
@@ -379,7 +383,7 @@ var App = {
             this.loadActivity(this.selected_activity);
         } else {
             this.loadActivity(first_activity);
-        } 
+        }
     },
 
     populateActivities: function(search_id) {
