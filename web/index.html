@@ -7,14 +7,15 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.awesome-markers@2.0.5/dist/leaflet.awesome-markers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.beautifymarker@1.1.1/leaflet-beautify-marker-icon.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@14.5.0/distribute/nouislider.min.css">
+        <link rel="stylesheet" href="leaflet-distance-marker.css">
         <link rel="stylesheet" href="style.css">
     </head>
 
      <body>
         <div id="map"></div>
-        
+
         <div id="bottombar">
             <div>
                 <span id="activity-name" class="has-text-weight-bold">NAME</span>
@@ -55,7 +56,7 @@
                             <input id="filter-name" class="input" type="text" placeholder="Name Pattern">
                         </div>
                     </div>
-                      
+
                     <div class="field">
                         <label class="label">Type</label>
                         <div class="control has-icons-left">
@@ -137,9 +138,12 @@
 
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/leaflet.awesome-markers@2.0.5/dist/leaflet.awesome-markers.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet.beautifymarker@1.1.1/leaflet-beautify-marker-icon.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet.beautifymarker@1.1.1/leaflet-beautify-marker.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/polyline-encoded@0.0.9/Polyline.encoded.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/nouislider@14.5.0/distribute/nouislider.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet-geometryutil@0.9.3/src/leaflet.geometryutil.min.js"></script>
+        <script src="leaflet-distance-marker.js"></script>
         <script src="activities.js"></script>
         <script src="app.js"></script>
     </body>
