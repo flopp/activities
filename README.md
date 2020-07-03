@@ -47,7 +47,7 @@ The authentication data is now saved in `data.db` for later use.
 ```
 .env/bin/activities \
     --sync \
-    ---browser
+    --browser
 ```
 
 This fetches your Strava data, creates a static website, and opens a browser to view the website.
