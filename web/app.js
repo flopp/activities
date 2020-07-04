@@ -9,7 +9,7 @@ $(function() {
 });
 
 var App = {
-    init: function(activities, athlete, last_sync) {
+    init: function (activities, athlete, last_sync) {
         this.activities = activities.reverse();
         this.added_activities = 0;
         this.athlete = athlete;
@@ -253,7 +253,7 @@ var App = {
                 }
                 $("#activity-name").text(activity['name']);
                 $("#activity-date").text(activity['start_date_local'].replace('T', ' '));
-                $("#activity-distance").text(`${(activity['distance'] / 1000).toFixed(2)} km`);
+                $("#activity-distance").text(this.format_distance(activity['distance']));
                 $("#activity-time").text(activity['moving_time']);
             }
             this.displayPolyline(polyline);
@@ -391,6 +391,15 @@ var App = {
         var selected_found = false;
 
         var count = 0;
+        var distance_sum = 0;
+        var distance_max = 0;
+        var distance_max_id = null;
+        var elevation_sum = 0;
+        var elevation_max = 0;
+        var elevation_max_id = null;
+        var time_sum = 0;
+        var time_max = 0;
+        var time_max_id = null;
         this.activities.forEach(item => {
             const activity_id = item['strava_id']
             const div = document.querySelector(`.activity[data-id="${activity_id}"]`);
@@ -407,16 +416,88 @@ var App = {
                     selected_found = true;
                 }
                 count += 1;
+
+                distance_sum += item['distance'];
+                if (distance_max_id === null || item['distance'] > distance_max) {
+                    distance_max_id = activity_id;
+                    distance_max = item['distance'];
+                }
+
+                elevation_sum += item['total_elevation_gain'];
+                if (elevation_max_id === null || item['total_elevation_gain'] > elevation_max) {
+                    elevation_max_id = activity_id;
+                    elevation_max = item['total_elevation_gain'];
+                }
+
+                const time = this.parse_duration(item['moving_time'])
+                time_sum += time;
+                if (time_max_id === null || time > time_max) {
+                    time_max_id = activity_id;
+                    time_max = time;
+                }
             }
         });
 
         document.querySelector('#filter-matches').textContent = `${count} / ${this.activities.length}`;
         document.querySelector('#no-activities-message').style.display = (count === 0) ? "block" : "none";
 
+        document.querySelector('#statistics-count').textContent = `${count}`;
+        if (count > 0) {
+            document.querySelector('#statistics-distance-sum').textContent = this.format_distance(distance_sum);
+            document.querySelector('#statistics-distance-avg').textContent = this.format_distance(distance_sum / count);
+            document.querySelector('#statistics-distance-max').textContent = this.format_distance(distance_max);
+
+            document.querySelector('#statistics-elevation-sum').textContent = this.format_elevation(elevation_sum);
+            document.querySelector('#statistics-elevation-avg').textContent = this.format_elevation(elevation_sum / count);
+            document.querySelector('#statistics-elevation-max').textContent = this.format_elevation(elevation_max);
+
+            document.querySelector('#statistics-time-sum').textContent = this.format_duration(time_sum);
+            document.querySelector('#statistics-time-avg').textContent = this.format_duration(time_sum / count);
+            document.querySelector('#statistics-time-max').textContent = this.format_duration(time_max);
+        } else {
+            document.querySelector('#statistics-distance-sum').textContent = "n/a";
+            document.querySelector('#statistics-distance-avg').textContent = "n/a";
+            document.querySelector('#statistics-distance-max').textContent = "n/a";
+
+            document.querySelector('#statistics-elevation-sum').textContent = "n/a";
+            document.querySelector('#statistics-elevation-avg').textContent = "n/a";
+            document.querySelector('#statistics-elevation-max').textContent = "n/a";
+
+            document.querySelector('#statistics-time-sum').textContent = "n/a";
+            document.querySelector('#statistics-time-avg').textContent = "n/a";
+            document.querySelector('#statistics-time-max').textContent = "n/a";
+        }
         if (selected_found) {
             this.loadActivity(this.selected_activity);
         } else {
             this.loadActivity(first_activity);
+        }
+    },
+
+    format_distance: function (d) {
+        return `${(d / 1000.0).toFixed(2)} km`;
+    },
+
+    format_elevation: function (d) {
+        return `${d.toFixed(0)} m`;
+    },
+
+    parse_duration: function (s) {
+        var a = /^(\d+):(\d\d):(\d\d)$/.exec(s);
+        if (a === null) {
+            console.log("Failed to parse duration:", s);
+            return 0;
+        }
+        return 3600 * parseInt(a[1]) + 60 * parseInt(a[2]) + parseInt(a[3]);
+    },
+
+    format_duration: function (d) {
+        const secondsPerDay = 24 * 60 * 60;
+        if (d < secondsPerDay) {
+            return new Date(d * 1000).toISOString().substr(11, 8);
+        } else {
+            const days = Math.floor(d / secondsPerDay);
+            return `${days}d ${new Date((d - days * secondsPerDay) * 1000).toISOString().substr(11, 8)}`;
         }
     },
 
@@ -464,8 +545,8 @@ var App = {
         var table_items = [];
         table_items.push({icon: "far fa-calendar-alt", value: activity['start_date_local'].replace('T', ' ')});
         table_items.push({icon: "far fa-question-circle", value: `<a class="type" data-type="${activity['type']}">${activity['type']}</a>`});
-        table_items.push({icon: "fas fa-arrows-alt-h", value: `${(activity['distance'] / 1000).toFixed(2)} km`});
-        table_items.push({icon: "fas fa-arrows-alt-v", value: `${activity['total_elevation_gain']} m`});
+        table_items.push({icon: "fas fa-arrows-alt-h", value: this.format_distance(activity['distance'])});
+        table_items.push({icon: "fas fa-arrows-alt-v", value: this.format_elevation(activity['total_elevation_gain'])});
         table_items.push({icon: "fas fa-stopwatch", value: activity['moving_time']});
         if ('streak' in activity) {
             table_items.push({icon: "fas fa-hashtag", value: `${activity['streak']}`});
