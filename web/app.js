@@ -1,3 +1,5 @@
+/* global $, L, noUiSlider, the_activities, the_strava_athlete, the_last_sync */
+
 $(function() {
     App.init(
         (typeof the_activities !== 'undefined') ? the_activities : [],
@@ -80,28 +82,21 @@ var App = {
 
     initEventHandlers: function() {
         var self = this;
-        $(document).on('click', '.activity', function () {
-            self.loadActivity($(this).data('id'));
-        });
-        $("#prev-button").click(function() {
-            self.loadPrevActivity();
-        });
-        $("#next-button").click(function() {
-            self.loadNextActivity();
-        });
-        $(document).on('click', '.type', function () {
-            const type = $(this).data('type');
-            self.filterActivities(
-                self.filter_name, type, self.filter_category, self.filter_min_distance, self.filter_max_distance);
-        });
-        $(document).on('click', '.category', function () {
-            const category = $(this).data('category');
-            self.filterActivities(
-                self.filter_name, self.filter_type, category, self.filter_min_distance, self.filter_max_distance);
-        });
+        /*
+         * Add click event handlers for objects of class 'activity', 'type', or
+         * 'category' that are created in the future.
+         */ 
+        document.addEventListener('click', event => {
+            if (event.target.classList.contains('activity')) {
+                self.loadActivity(event.target.dataset.id);
+            } else if (event.target.classList.contains('type')) {
+                self.setTypeFilter(event.target.dataset.type);
+            } else if (event.target.classList.contains('category')) {
+                self.setCategoryFilter(event.target.dataset.category);
+            }
+        }, false);
         $("#filter-name").change(function () {
-            self.filterActivities(
-                $(this).val(), self.filter_type, self.filter_category, self.filter_min_distance, self.filter_max_distance);
+            self.setNameFilter($(this).val());
         });
         $("#filter-type")
             .change(function () {
@@ -109,8 +104,7 @@ var App = {
                 $("#filter-type option:selected").each(function() {
                     type = $(this).val();
                 });
-                self.filterActivities(
-                    self.filter_name, type, self.filter_category, self.filter_min_distance, self.filter_max_distance);
+                self.setTypeFilter(type);
             });
         $("#filter-category")
             .change(function () {
@@ -118,20 +112,25 @@ var App = {
                 $("#filter-category option:selected").each(function() {
                     category = $(this).val();
                 });
-                self.filterActivities(
-                    self.filter_name, self.filter_type, category, self.filter_min_distance, self.filter_max_distance);
+                self.setCategoryFilter(category);
             });
+
+        $("#prev-button").click(function() {
+            self.loadPrevActivity();
+        });
+        $("#next-button").click(function() {
+            self.loadNextActivity();
+        });
 
         document.querySelectorAll(".sidebar-control").forEach(control => {
             const container_id = control.dataset.container;
             const container = document.getElementById(container_id);
 
-            container.querySelector(".header > .close").onclick = event => {
+            container.querySelector(".header > .close").onclick = () => {
                 self.toggleSidebar(null);
             };
 
-            const a = control.getElementsByTagName("a")[0];
-            a.onclick = event => {
+            control.querySelector("a").onclick = () => {
                 self.toggleSidebar(container_id);
             };
         });
@@ -192,8 +191,7 @@ var App = {
         });
         distance_slider.noUiSlider.on('set', function () {
             const range = this.get();
-            self.filterActivities(
-                self.filter_name, self.filter_type, self.filter_category, Number(range[0]), Number(range[1]));
+            self.setDistanceFilter(Number(range[0]), Number(range[1]));
         });
     },
 
@@ -332,6 +330,42 @@ var App = {
         }
 
         return true;
+    },
+
+    setNameFilter: function(name) {
+        this.filterActivities(
+            name,
+            this.filter_type,
+            this.filter_category,
+            this.filter_min_distance,
+            this.filter_max_distance);
+    },
+
+    setTypeFilter: function(type) {
+        this.filterActivities(
+            this.filter_name,
+            type,
+            this.filter_category,
+            this.filter_min_distance,
+            this.filter_max_distance);
+    },
+
+    setCategoryFilter: function(category) {
+        this.filterActivities(
+            this.filter_name,
+            this.filter_type,
+            category,
+            this.filter_min_distance,
+            this.filter_max_distance);
+    },
+
+    setDistanceFilter: function(min_distance, max_distance) {
+        this.filterActivities(
+            this.filter_name,
+            this.filter_type,
+            this.filter_category,
+            min_distance,
+            max_distance);
     },
 
     filterActivities: function(name, type, category, min_distance, max_distance) {
@@ -500,7 +534,7 @@ var App = {
                         inline: "nearest"
                     });
                 }
-            };
+            }
         }
 
         this.map.invalidateSize(false);
