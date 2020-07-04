@@ -3,13 +3,12 @@ name: Python package
 on: [push, pull_request]
 
 jobs:
-  build:
+  tox:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
         python-version: [3.8]
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -22,3 +21,16 @@ jobs:
         pip install tox
     - name: Test with tox
       run: tox -e format
+  
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: Install dependencies
+      run: npm install --no-save eslint
+    - name: Run ESLint
+      run: node_modules/.bin/eslint web/app.js

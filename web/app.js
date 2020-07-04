@@ -1,4 +1,4 @@
-/* global $, L, noUiSlider, the_activities, the_strava_athlete, the_last_sync */
+/* global L, noUiSlider, the_activities, the_strava_athlete, the_last_sync */
 
 $(function() {
     App.init(
