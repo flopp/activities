@@ -49,7 +49,7 @@
                     <span class="close"><i class="fas fa-times"></i></span>
                     <h2>Filters</h2>
                 </div>
-                <div class="content">
+                <div class="content margin8">
                     <div class="field">
                         <label class="label">Name</label>
                         <div class="control">
@@ -98,84 +98,91 @@
                     <span class="close"><i class="fas fa-times"></i></span>
                     <h2>Statistics</h2>
                 </div>
-                <div class="content">
-                    <p>
-                        These statistics apply to the <span id="statistics-count">n/a</span> activities matching the current filter settings.
-                    </p>
-                    <table id="statistics-table">
-                        <tr>
-                            <td colspan=3>
-                                <h3>Distance</h3>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Sum:</td>
-                            <td colspan=2 id="statistics-distance-sum">n/a</td>
-                        </tr>
-                        <tr>
-                            <td>Avg:</td>
-                            <td colspan=2 id="statistics-distance-avg">n/a</td>
-                        </tr>
-                        <tr>
-                            <td>Max:</td>
-                            <td id="statistics-distance-max">n/a</td>
-                            <td>
-                                <button id="statistics-distance-max-button" class="button is-small statistics-button">
-                                    <span class="icon is-small">
-                                        <i class="fas fa-map-marked-alt"></i>
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan=3>
-                                <h3>Elevation</h3>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Sum:</td>
-                            <td colspan=2 id="statistics-elevation-sum">n/a</td>
-                        </tr>
-                        <tr>
-                            <td>Avg:</td>
-                            <td colspan=2 id="statistics-elevation-avg">n/a</td>
-                        </tr>
-                        <tr>
-                            <td>Max:</td>
-                            <td id="statistics-elevation-max">n/a</td>
-                            <td>
-                                <button id="statistics-elevation-max-button" class="button is-small statistics-button">
-                                    <span class="icon is-small">
-                                        <i class="fas fa-map-marked-alt"></i>
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan=3>
-                                <h3>Time</h3>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Sum:</td>
-                            <td colspan=2 id="statistics-time-sum">n/a</td>
-                        </tr>
-                        <tr>
-                            <td>Avg:</td>
-                            <td colspan=2 id="statistics-time-avg">n/a</td>
-                        </tr>
-                        <tr>
-                            <td>Max:</td>
-                            <td id="statistics-time-max">n/a</td>
-                            <td>
-                                <button id="statistics-time-max-button" class="button is-small statistics-button">
-                                    <span class="icon is-small">
-                                        <i class="fas fa-map-marked-alt"></i>
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
+                <div class="scrollable-content">
+                    <div class="content">
+                        <p>
+                            These statistics apply to the <span id="statistics-count">n/a</span> activities matching the current filter settings.
+                        </p>
+                        <table id="statistics-table">
+                            <tr id="statistics-table-types">
+                                <td colspan=3>
+                                    <h3>Types</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan=3>
+                                    <h3>Distance</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sum:</td>
+                                <td colspan=2 id="statistics-distance-sum">n/a</td>
+                            </tr>
+                            <tr>
+                                <td>Avg:</td>
+                                <td colspan=2 id="statistics-distance-avg">n/a</td>
+                            </tr>
+                            <tr>
+                                <td>Max:</td>
+                                <td id="statistics-distance-max">n/a</td>
+                                <td>
+                                    <button id="statistics-distance-max-button" class="button is-small statistics-button">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                        </span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan=3>
+                                    <h3>Elevation</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sum:</td>
+                                <td colspan=2 id="statistics-elevation-sum">n/a</td>
+                            </tr>
+                            <tr>
+                                <td>Avg:</td>
+                                <td colspan=2 id="statistics-elevation-avg">n/a</td>
+                            </tr>
+                            <tr>
+                                <td>Max:</td>
+                                <td id="statistics-elevation-max">n/a</td>
+                                <td>
+                                    <button id="statistics-elevation-max-button" class="button is-small statistics-button">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                        </span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan=3>
+                                    <h3>Time</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sum:</td>
+                                <td colspan=2 id="statistics-time-sum">n/a</td>
+                            </tr>
+                            <tr>
+                                <td>Avg:</td>
+                                <td colspan=2 id="statistics-time-avg">n/a</td>
+                            </tr>
+                            <tr>
+                                <td>Max:</td>
+                                <td id="statistics-time-max">n/a</td>
+                                <td>
+                                    <button id="statistics-time-max-button" class="button is-small statistics-button">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-map-marked-alt"></i>
+                                        </span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
 

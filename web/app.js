@@ -418,6 +418,7 @@ var App = {
         var time_sum = 0;
         var time_max = 0;
         var time_max_id = null;
+        const types = new Map();
         this.activities.forEach(item => {
             const activity_id = item['strava_id']
             const div = document.querySelector(`.activity[data-id="${activity_id}"]`);
@@ -434,6 +435,12 @@ var App = {
                     selected_found = true;
                 }
                 count += 1;
+
+                if (types.has(item['type'])) {
+                    types.set(item['type'], types.get(item['type']) + 1);
+                } else {
+                    types.set(item['type'], 1);
+                }
 
                 distance_sum += item['distance'];
                 if (distance_max_id === null || item['distance'] > distance_max) {
@@ -465,6 +472,22 @@ var App = {
 
         document.querySelector('#statistics-count').textContent = `${count}`;
         if (count > 0) {
+            document.querySelectorAll('.statistics-table-type-row').forEach(row => {
+                row.remove();
+            });
+            var before = document.querySelector('#statistics-table-types').nextElementSibling;
+            types.forEach((value, key) => {
+                const tr = document.createElement("tr");
+                tr.classList.add("statistics-table-type-row");
+                const td1 = document.createElement("td");
+                td1.appendChild(document.createTextNode(key));
+                tr.appendChild(td1);
+                const td2 = document.createElement("td");
+                td2.colSpan = 2;
+                td2.appendChild(document.createTextNode(value));
+                tr.appendChild(td2);
+                before.parentNode.insertBefore(tr, before);
+            });
             document.querySelector('#statistics-distance-max-button').dataset.id = distance_max_id;
             document.querySelector('#statistics-elevation-max-button').dataset.id = elevation_max_id;
             document.querySelector('#statistics-time-max-button').dataset.id = time_max_id;
