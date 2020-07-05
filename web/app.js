@@ -87,12 +87,24 @@ var App = {
          * 'category' that are created in the future.
          */ 
         document.addEventListener('click', event => {
-            if (event.target.classList.contains('activity')) {
-                self.loadActivity(event.target.dataset.id);
-            } else if (event.target.classList.contains('type')) {
-                self.setTypeFilter(event.target.dataset.type);
-            } else if (event.target.classList.contains('category')) {
-                self.setCategoryFilter(event.target.dataset.category);
+            var obj = event.target;
+            while (obj.parentElement !== null &&
+                   !obj.classList.contains('activity') &&
+                   !obj.classList.contains('type') &&
+                   !obj.classList.contains('category')
+            ) {
+                obj = obj.parentElement;
+            }
+
+            if (obj.classList.contains('activity')) {
+                self.loadActivity(obj.dataset.id);
+                event.stopPropagation();
+            } else if (obj.classList.contains('type')) {
+                self.setTypeFilter(obj.dataset.type);
+                event.stopPropagation();
+            } else if (obj.classList.contains('category')) {
+                self.setCategoryFilter(obj.dataset.category);
+                event.stopPropagation();
             }
         }, false);
         $("#filter-name").change(function () {
@@ -120,6 +132,12 @@ var App = {
         });
         $("#next-button").click(function() {
             self.loadNextActivity();
+        });
+
+        document.querySelectorAll(".statistics-button").forEach(button => {
+            button.onclick = () => {
+                self.loadActivity(button.dataset.id);
+            }
         });
 
         document.querySelectorAll(".sidebar-control").forEach(control => {
@@ -438,35 +456,36 @@ var App = {
             }
         });
 
+        this.statistics_distance_max_id = distance_max_id;
+        this.statistics_elevation_max_id = elevation_max_id;
+        this.statistics_time_max_id = time_max_id;
+
         document.querySelector('#filter-matches').textContent = `${count} / ${this.activities.length}`;
         document.querySelector('#no-activities-message').style.display = (count === 0) ? "block" : "none";
 
         document.querySelector('#statistics-count').textContent = `${count}`;
         if (count > 0) {
+            document.querySelector('#statistics-distance-max-button').dataset.id = distance_max_id;
+            document.querySelector('#statistics-elevation-max-button').dataset.id = elevation_max_id;
+            document.querySelector('#statistics-time-max-button').dataset.id = time_max_id;
+
             document.querySelector('#statistics-distance-sum').textContent = this.format_distance(distance_sum);
             document.querySelector('#statistics-distance-avg').textContent = this.format_distance(distance_sum / count);
             document.querySelector('#statistics-distance-max').textContent = this.format_distance(distance_max);
-
+            
             document.querySelector('#statistics-elevation-sum').textContent = this.format_elevation(elevation_sum);
             document.querySelector('#statistics-elevation-avg').textContent = this.format_elevation(elevation_sum / count);
             document.querySelector('#statistics-elevation-max').textContent = this.format_elevation(elevation_max);
-
+            
             document.querySelector('#statistics-time-sum').textContent = this.format_duration(time_sum);
             document.querySelector('#statistics-time-avg').textContent = this.format_duration(time_sum / count);
             document.querySelector('#statistics-time-max').textContent = this.format_duration(time_max);
+
+            document.querySelector('#statistics-table').style.display = "table";
         } else {
-            document.querySelector('#statistics-distance-sum').textContent = "n/a";
-            document.querySelector('#statistics-distance-avg').textContent = "n/a";
-            document.querySelector('#statistics-distance-max').textContent = "n/a";
-
-            document.querySelector('#statistics-elevation-sum').textContent = "n/a";
-            document.querySelector('#statistics-elevation-avg').textContent = "n/a";
-            document.querySelector('#statistics-elevation-max').textContent = "n/a";
-
-            document.querySelector('#statistics-time-sum').textContent = "n/a";
-            document.querySelector('#statistics-time-avg').textContent = "n/a";
-            document.querySelector('#statistics-time-max').textContent = "n/a";
+            document.querySelector('#statistics-table').style.display = "none";
         }
+
         if (selected_found) {
             this.loadActivity(this.selected_activity);
         } else {

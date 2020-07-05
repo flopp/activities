@@ -129,7 +129,7 @@ html {
     min-height: 0;
 }
 
-.statistics-table h3 {
+#statistics-table h3 {
     margin: 0;
     padding: 0;
     border: 0;
