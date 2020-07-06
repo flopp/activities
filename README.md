@@ -1,5 +1,9 @@
 # Activities
 
+[![Any color you like](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+https://github.com/flopp/activities/workflows/Continuous Integration/badge.svg
+
+
 Your self-hosted activities overview (running, cycling, ...). Synced with [Strava](https://www.strava.com).
 
 https://activities.flopp.net

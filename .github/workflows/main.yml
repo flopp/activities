@@ -1,4 +1,4 @@
-name: Python package
+name: Continuous Integration
 
 on: [push, pull_request]
 
@@ -21,7 +21,7 @@ jobs:
         pip install tox
     - name: Test with tox
       run: tox -e format
-  
+
   eslint:
     runs-on: ubuntu-latest
     steps:
