@@ -2,6 +2,10 @@ html {
     overflow-y: auto;
 }
 
+.modal {
+    z-index: 3000;
+}
+
 #map {
     position: absolute;
     left: 0;

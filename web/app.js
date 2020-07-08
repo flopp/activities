@@ -1,4 +1,4 @@
-/* global L, noUiSlider, the_activities, the_strava_athlete, the_last_sync */
+/* global L, HeatmapOverlay, noUiSlider, the_activities, the_strava_athlete, the_last_sync */
 
 $(function() {
     App.init(
@@ -20,6 +20,8 @@ var App = {
         this.filter_max_distance = null;
         this.max_distance = null;
         this.selected_activity = null;
+        this.heatmapActive = false;
+        this.heatmapDataInitialized = false;
         this.map = this.initMap();
         this.track = null;
         this.start_point = null;
@@ -62,11 +64,29 @@ var App = {
     },
 
     initMap: function() {
+        const self = this;
+
         const openstreetmap = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors'});
         const opentopomap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
             attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors, SRTM | map style: © <a href="http://opentopomap.org/" target="_blank">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC-BY-SA</a>)'});
+        const cartodark = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png', {
+            attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors, SRTM | map style: © <a href="http://opentopomap.org/" target="_blank">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC-BY-SA</a>)'});
 
+        const heatmap_config = {
+            // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+            // if scaleRadius is false it will be the constant radius used in pixels
+            "radius": 0.0007,
+            "maxOpacity": .5,
+            // scales the radius based on map zoom
+            "scaleRadius": true,
+            "useLocalExtrema": false,
+            latField: 'lat',
+            lngField: 'lng',
+            valueField: 'count'
+        };
+        this.heatmap = new HeatmapOverlay(heatmap_config);
+    
         const map = L.map('map', {
             center: [48, 8],
             zoom: 13,
@@ -74,8 +94,25 @@ var App = {
             zoomSnap: 0.33
         });
 
-        L.control.layers({"OpenStreetMap": openstreetmap, "OpenTopoMap": opentopomap}, {}).addTo(map);
+        L.control.layers({
+            "OpenStreetMap": openstreetmap,
+            "OpenTopoMap": opentopomap,
+            "CARTO dark": cartodark
+        }, {
+            "Heatmap": this.heatmap
+        }).addTo(map);
         map.zoomControl.setPosition('bottomright');
+
+        map.on('overlayadd', event => {
+            if (event.name === "Heatmap") {
+                self.onHeatmapToggle(true);
+            }
+        });
+        map.on('overlayremove', event => {
+            if (event.name === "Heatmap") {
+                self.onHeatmapToggle(false);
+            }
+        });
 
         return map;
     },
@@ -514,6 +551,8 @@ var App = {
         } else {
             this.loadActivity(first_activity);
         }
+
+        this.fillHeatmap();
     },
 
     format_distance: function (d) {
@@ -661,5 +700,123 @@ var App = {
         }
 
         this.map.invalidateSize(false);
+    },
+
+    onHeatmapToggle: function (on) {
+        const self = this;
+
+        if (this.heatmapActive === on) {
+            return;
+        }
+        this.heatmapActive = on;
+
+        if (on) {
+            if (this.heatmapDataInitialized) {
+                self.fillHeatmap();
+            } else {
+                $("#heatmap-modal").addClass("is-active");
+                setTimeout(() => {
+                    self.fillHeatmap();
+                    self.heatmapDataInitialized = true;
+                    $("#heatmap-modal").removeClass("is-active");
+                }, 0);
+            }
+        }
+    },
+
+    getHeatmapPointsForActivity: function (activity) {
+        const self = this;
+
+        if ('heatmap_points' in activity) {
+            return activity['heatmap_points'];
+        }
+
+        const points = new Map();
+        if (!('summary_polyline' in activity)) {
+            activity['heatmap_points'] = points;
+            return points;
+        }
+        
+        const polyline = activity['summary_polyline'];
+        if (polyline === null || polyline === "") {
+            activity['heatmap_points'] = points;
+            return points;
+        }
+
+        const latlngs = L.PolylineUtil.decode(polyline).map(a => {
+            return L.latLng(a[0], a[1]);
+        });
+        const accumulated = L.GeometryUtil.accumulatedLengths(latlngs);
+        const length = accumulated.length > 0 ? accumulated[accumulated.length - 1] : 0;
+        const offset = 25;
+        const count = Math.floor(length / offset);
+
+        var j = 0;
+        for (var i = 1; i <= count; ++i) {
+            const distance = offset * i;
+            while ((j < (accumulated.length - 1)) && (accumulated[j] < distance)) {
+                ++j;
+            }
+            const p1 = latlngs[j - 1];
+            const p2 = latlngs[j];
+            const ratio = (distance - accumulated[j - 1]) / (accumulated[j] - accumulated[j - 1]);
+            const position = L.GeometryUtil.interpolateOnLine(self.map, [p1, p2], ratio);
+            const key = `${position.latLng.lat.toFixed(4)}/${position.latLng.lng.toFixed(4)}`;
+            if (points.has(key)) {
+                points.get(key).count += 1;
+            } else {
+                points.set(key, {
+                    lat: Number(Math.round(position.latLng.lat + 'e4') + 'e-4'),
+                    lng: Number(Math.round(position.latLng.lng + 'e4') + 'e-4'),
+                    count: 1
+                });
+            }
+        }
+
+        activity['heatmap_points'] = points;
+        return points;
+    },
+
+    fillHeatmap: function() {
+        if (!this.heatmapActive) {
+            return;
+        }
+
+        const self = this;
+        const points = new Map();
+        this.activities.forEach(activity => {
+            const match = self.matchesFilter(activity);
+            if (!match) {
+                return;
+            }
+
+            self.getHeatmapPointsForActivity(activity).forEach((value, key) => {
+                if (points.has(key)) {
+                    points.get(key).count += value.count;
+                } else {
+                    points.set(key, {
+                        lat: value.lat,
+                        lng: value.lng,
+                        count: value.count
+                    });
+                }
+            });
+        });
+
+        var max = 0;
+        points.forEach(d => {
+            if (d['count'] > max) {
+                max = d['count'];
+            }
+        });
+
+        const data = [];
+        points.forEach(d => {
+            data.push({lat: d.lat, lng: d.lng, count: Math.log(1 + d.count)});
+        });
+
+        console.log(this);
+        console.log(this.heatmap);
+        this.heatmap.setData({max: Math.log(1 + max), data: data});
     }
 };

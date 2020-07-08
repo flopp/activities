@@ -18,6 +18,7 @@ https://activities.flopp.net
 - Visited POI (predefined point-of-interest) matching.
 - Filtering by activity name, activity type, min/max distance, visited POI.
 - Running streak computation.
+- Heatmaps.
 
 ## Usage
 
@@ -82,6 +83,7 @@ Then just add the option `--poi mypoi.json` to your `.env/bin/activities` comman
 - [Bulma](https://bulma.io/)
 - [Click](https://click.palletsprojects.com/)
 - [Flask](https://flask.palletsprojects.com/)
+- [heatmap.js](https://www.patrick-wied.at/static/heatmapjs/)
 - [geopy](https://github.com/geopy/geopy)
 - [jQuery](https://jquery.com/)
 - [Leaflet](https://leafletjs.com/)
