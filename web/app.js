@@ -16,6 +16,7 @@ var App = {
         this.filter_name = null;
         this.filter_type = null;
         this.filter_category = null;
+        this.filter_year = null;
         this.filter_min_distance = 0;
         this.filter_max_distance = null;
         this.max_distance = null;
@@ -54,7 +55,7 @@ var App = {
         this.populateActivities(activity_id);
         this.toggleSidebar("sidebar-activities");
         this.loadActivity(activity_id);
-        this.filterActivities('', 'All', 'All', 0, this.max_distance);
+        this.filterActivities('', 'All', 'All', 'All', 0, this.max_distance);
         document.querySelector("#no-activities-message").style.display = "none";
         $('#last-sync').text(`Last Sync: ${last_sync}`);
         if (this.athlete) {
@@ -128,7 +129,8 @@ var App = {
             while (obj.parentElement !== null &&
                    !obj.classList.contains('activity') &&
                    !obj.classList.contains('type') &&
-                   !obj.classList.contains('category')
+                   !obj.classList.contains('category') &&
+                   !obj.classList.contains('year')
             ) {
                 obj = obj.parentElement;
             }
@@ -141,6 +143,9 @@ var App = {
                 event.stopPropagation();
             } else if (obj.classList.contains('category')) {
                 self.setCategoryFilter(obj.dataset.category);
+                event.stopPropagation();
+            } else if (obj.classList.contains('year')) {
+                self.setCategoryFilter(obj.dataset.year);
                 event.stopPropagation();
             }
         }, false);
@@ -162,6 +167,14 @@ var App = {
                     category = $(this).val();
                 });
                 self.setCategoryFilter(category);
+            });
+        $("#filter-year")
+            .change(function () {
+                var year = null;
+                $("#filter-year option:selected").each(function() {
+                    year = $(this).val();
+                });
+                self.setYearFilter(year);
             });
 
         $("#prev-button").click(function() {
@@ -195,11 +208,13 @@ var App = {
         const self = this;
         var types = new Set();
         var categories = new Set();
+        var years = new Set();
         this.max_distance = 0;
 
         this.activities.forEach(activity => {
             self.max_distance = Math.max(activity['distance'], self.max_distance);
             types.add(activity['type']);
+            years.add(activity['start_date_local'].slice(0, 4));
             if ('pois' in activity) {
                 activity['pois'].forEach(category => {
                     categories.add(category);
@@ -222,6 +237,14 @@ var App = {
         Array.from(categories).sort().forEach(category => {
             $('#filter-category').append(
                 $(`<option value="${category}">${category}</option>`)
+            );
+        });
+        $('#filter-year').append(
+            $('<option value="All">All</option>')
+        );
+        Array.from(years).sort().forEach(year => {
+            $('#filter-year').append(
+                $(`<option value="${year}">${year}</option>`)
             );
         });
 
@@ -374,6 +397,11 @@ var App = {
                 return false;
             }
         }
+        if (this.filter_year !== null && this.filter_year !== 'All') {
+            if (activity['start_date_local'].slice(0, 4) !== this.filter_year) {
+                return false;
+            }
+        }
         if (this.filter_category !== null && this.filter_category !== 'All') {
             if (!('pois' in activity) || !(activity['pois'].includes(this.filter_category))) {
                 return false;
@@ -392,6 +420,7 @@ var App = {
             name,
             this.filter_type,
             this.filter_category,
+            this.filter_year,
             this.filter_min_distance,
             this.filter_max_distance);
     },
@@ -401,6 +430,17 @@ var App = {
             this.filter_name,
             type,
             this.filter_category,
+            this.filter_year,
+            this.filter_min_distance,
+            this.filter_max_distance);
+    },
+
+    setYearFilter: function(year) {
+        this.filterActivities(
+            this.filter_name,
+            this.filter_type,
+            this.filter_category,
+            year,
             this.filter_min_distance,
             this.filter_max_distance);
     },
@@ -410,6 +450,7 @@ var App = {
             this.filter_name,
             this.filter_type,
             category,
+            this.filter_year,
             this.filter_min_distance,
             this.filter_max_distance);
     },
@@ -419,14 +460,16 @@ var App = {
             this.filter_name,
             this.filter_type,
             this.filter_category,
+            this.filter_year,
             min_distance,
             max_distance);
     },
 
-    filterActivities: function(name, type, category, min_distance, max_distance) {
+    filterActivities: function(name, type, category, year, min_distance, max_distance) {
         if (name === this.filter_name &&
             type === this.filter_type &&
             category === this.filter_category &&
+            year === this.filter_year &&
             min_distance === this.filter_min_distance &&
             max_distance === this.filter_max_distance
         ) {
@@ -435,11 +478,13 @@ var App = {
         this.filter_name = name;
         this.filter_type = type;
         this.filter_category = category;
+        this.filter_year = year;
         this.filter_min_distance = min_distance;
         this.filter_max_distance = max_distance;
         document.querySelector('#filter-name').value = name;
         document.querySelector(`#filter-type [value="${type}"]`).selected = true;
         document.querySelector(`#filter-category [value="${category}"]`).selected = true;
+        document.querySelector(`#filter-year [value="${year}"]`).selected = true;
         document.getElementById('filter-distance').noUiSlider.set([min_distance, max_distance]);
         var self = this;
         var first_activity = null;
