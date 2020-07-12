@@ -627,6 +627,17 @@ var App = {
         }
     },
 
+    format_pace: function (d) {
+        const pace = (1000.0 / 60.0) * (1.0 / d);
+        const minutes = Math.floor(pace);
+        const seconds = (pace - minutes) * 60.0; 
+        return `${minutes}:${seconds.toFixed(0).toString().padStart(2, "0")} min/km`;
+    },
+
+    format_heartrate: function (d) {
+        return `${d.toFixed(0)} bpm`;
+    },
+
     populateActivities: function(search_id) {
         var self = this;
 
@@ -674,6 +685,12 @@ var App = {
         table_items.push({icon: "fas fa-arrows-alt-h", value: this.format_distance(activity['distance'])});
         table_items.push({icon: "fas fa-arrows-alt-v", value: this.format_elevation(activity['total_elevation_gain'])});
         table_items.push({icon: "fas fa-stopwatch", value: activity['moving_time']});
+        if (activity['average_speed'] !== null) {
+            table_items.push({icon: "fas fa-tachometer-alt", value: this.format_pace(activity['average_speed'])});
+        }
+        if (activity['average_heartrate'] !== null) {
+            table_items.push({icon: "fas fa-heartbeat", value: this.format_heartrate(activity['average_heartrate'])});
+        }
         if ('streak' in activity) {
             table_items.push({icon: "fas fa-hashtag", value: `${activity['streak']}`});
         }

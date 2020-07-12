@@ -73,6 +73,8 @@ ACTIVITY_KEYS = [
     "start_date_local",
     "location_country",
     "summary_polyline",
+    "average_heartrate",
+    "average_speed",
 ]
 
 
@@ -93,6 +95,8 @@ class Activity(Base):
     location_country = Column(String)
     summary_polyline = Column(String)
     track = Column(PickleType)
+    average_heartrate =  Column(Float)
+    average_speed =  Column(Float)
     pois = None
     streak = None
 
@@ -142,7 +146,6 @@ class Activity(Base):
 
 def update_or_create_activity(session: Session, athlete: Athlete, strava_activity: StravaActivity) -> bool:
     created = False
-
     activity: Optional[Activity] = session.query(Activity).filter_by(strava_id=strava_activity.id).first()
     if not activity:
         activity = Activity(
@@ -157,6 +160,8 @@ def update_or_create_activity(session: Session, athlete: Athlete, strava_activit
             start_date=strava_activity.start_date,
             start_date_local=strava_activity.start_date_local,
             location_country=strava_activity.location_country,
+            average_heartrate=strava_activity.average_heartrate,
+            average_speed=strava_activity.average_speed,
         )
         session.add(activity)
         created = True
@@ -167,7 +172,8 @@ def update_or_create_activity(session: Session, athlete: Athlete, strava_activit
         activity.elapsed_time = strava_activity.elapsed_time
         activity.total_elevation_gain = float(strava_activity.total_elevation_gain)
         activity.type = strava_activity.type
-
+        activity.average_heartrate=strava_activity.average_heartrate,
+        activity.average_speed=strava_activity.average_speed,
     try:
         decoded = polyline.decode(strava_activity.map.summary_polyline)
         activity.summary_polyline = strava_activity.map.summary_polyline
