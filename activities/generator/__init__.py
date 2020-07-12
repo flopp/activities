@@ -105,7 +105,7 @@ class Generator:
         streak = 0
         last_date = None
         for activity in activities:
-            # Determinine running streak.
+            # Determine running streak.
             if activity.type == "Run":
                 date = datetime.datetime.strptime(activity.start_date_local, "%Y-%m-%d %H:%M:%S").date()
                 if last_date is None:
