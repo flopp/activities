@@ -136,7 +136,7 @@ var App = {
             }
 
             if (obj.classList.contains('activity')) {
-                self.loadActivity(obj.dataset.id);
+                self.clickActivity(obj.dataset.id);
                 event.stopPropagation();
             } else if (obj.classList.contains('type')) {
                 self.setTypeFilter(obj.dataset.type);
@@ -310,6 +310,14 @@ var App = {
         });
     },
 
+    clickActivity: function(id) {
+        if (this.selected_activity === id) {
+            this.loadActivity(null);
+        } else {
+            this.loadActivity(id);
+        }
+    },
+ 
     loadActivity: function(id) {
         this.selected_activity = id;
         document.querySelectorAll('.activity').forEach(div => {
