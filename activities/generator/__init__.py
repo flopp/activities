@@ -8,7 +8,7 @@ import arrow  # type: ignore
 import stravalib  # type: ignore
 from sqlalchemy import func
 
-from activities.generator.db import init_db, update_or_create_activity, Athlete, Activity, Auth
+from activities.generator.db import init_db, clear_activities, update_or_create_activity, Athlete, Activity, Auth
 
 
 class Generator:
@@ -73,9 +73,10 @@ class Generator:
             self.session.add(athlete)
             self.session.commit()
 
-        print("Start syncing")
         if force:
-            filters = {"before": datetime.datetime.utcnow()}
+            print("Force sync -> clear existing activities")
+            clear_activities(self.session)
+            filters = {}
         else:
             last_activity = self.session.query(func.max(Activity.start_date)).scalar()
             if last_activity:
@@ -83,8 +84,9 @@ class Generator:
                 last_activity_date = last_activity_date.shift(days=-7)
                 filters = {"after": last_activity_date.datetime}
             else:
-                filters = {"before": datetime.datetime.utcnow()}
+                filters = {}
 
+        print("Start syncing")
         for strava_activity in self.client.get_activities(**filters):
             created = update_or_create_activity(self.session, athlete, strava_activity)
             if created:

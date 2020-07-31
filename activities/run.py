@@ -30,7 +30,7 @@ def run_auth_app(config: str, data: str, pois: str) -> None:
 @click.option("-d", "--data", default="data.db", metavar="DATA_FILE", type=click.Path())
 @click.option("-o", "--output", default="web/activities.js", metavar="JS_FILE", type=click.Path())
 @click.option("-b", "--browser", is_flag=True, help="Open the generated website in a web browser.")
-@click.option("-f", "--force", is_flag=True, help="Force sync for older activities than the last synced.")
+@click.option("-f", "--force", is_flag=True, help="Force re-sync of all activities.")
 def run(
     config: str, pois: str, data: str, output: str, sync: bool, browser: bool, force: bool, reset: bool, auth: bool,
 ) -> None:

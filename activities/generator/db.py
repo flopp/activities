@@ -185,6 +185,10 @@ def update_or_create_activity(session: Session, athlete: Athlete, strava_activit
     return created
 
 
+def clear_activities(session: Session) -> None:
+    session.query(Activity).delete()
+
+
 def init_db(db_path: str) -> Session:
     engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
