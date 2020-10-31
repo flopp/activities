@@ -73,7 +73,9 @@ var App = {
             attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors, SRTM | map style: © <a href="http://opentopomap.org/" target="_blank">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC-BY-SA</a>)'});
         const cartodark = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png', {
             attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors, SRTM | map style: © <a href="http://opentopomap.org/" target="_blank">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC-BY-SA</a>)'});
-
+        const arcgis_worldimagery = L.tileLayer('https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Source: Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community'});
+            
         const heatmap_config = {
             // radius should be small ONLY if scaleRadius is true (or small radius is intended)
             // if scaleRadius is false it will be the constant radius used in pixels
@@ -98,7 +100,8 @@ var App = {
         L.control.layers({
             "OpenStreetMap": openstreetmap,
             "OpenTopoMap": opentopomap,
-            "CARTO dark": cartodark
+            "CARTO dark": cartodark,
+            "ArcGIS World Imagery": arcgis_worldimagery,
         }, {
             "Heatmap": this.heatmap
         }).addTo(map);
