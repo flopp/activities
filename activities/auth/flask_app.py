@@ -13,7 +13,7 @@ from activities.generator.db import init_db, Auth
 app = flask.Flask(__name__)
 
 
-def configure(config: str, data: str, pois: str) -> None:
+def configure(config: str, data: str, pois: str, thumbnails: str) -> None:
     with open(config) as f:
         config_content = json.load(f)
 
@@ -22,6 +22,7 @@ def configure(config: str, data: str, pois: str) -> None:
     app.config["data"] = data
     app.config["config"] = config
     app.config["pois"] = pois
+    app.config["thumbnails"] = thumbnails
 
 
 @app.route("/")
@@ -66,7 +67,7 @@ def auth() -> Response:
 
 @app.route("/sync")
 def sync() -> str:
-    generator = Generator(app.config["config"], app.config["data"], app.config["pois"])
+    generator = Generator(app.config["config"], app.config["data"], app.config["pois"], app.config["thumbnails"])
     generator.sync()
 
     return flask.render_template("sync_complete.html")

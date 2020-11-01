@@ -12,7 +12,9 @@ from activities.generator.db import init_db, clear_activities, update_or_create_
 
 
 class Generator:
-    def __init__(self, strava_config_path: str, db_path: str, pois_data_path: str):
+    def __init__(self, strava_config_path: str, db_path: str, pois_data_path: str, thumbnails_path: str):
+        self.thumbnails_path = thumbnails_path
+
         self.client = stravalib.Client()
         self.session = init_db(db_path)
 
@@ -22,8 +24,7 @@ class Generator:
             if not {"client_id", "client_secret"} <= strava_config.keys():
                 raise KeyError("Missing keys from strava configuration.")
 
-        self.client_id = strava_config["client_id"]
-        self.client_secret = strava_config["client_secret"]
+        self.client_data = {"id": strava_config["client_id"], "secret": strava_config["client_secret"]}
 
         # Load the POIs
         if pois_data_path:
@@ -37,7 +38,6 @@ class Generator:
             raise Exception("Missing auth data in DB.")
 
         self.authdata = auth
-        self.authdata_changed = False
 
     def check_access(self) -> None:
         assert self.authdata is not None
@@ -47,7 +47,9 @@ class Generator:
         if now + datetime.timedelta(minutes=5) >= expires_at:
             print("Refreshing access token")
             response = self.client.refresh_access_token(
-                client_id=self.client_id, client_secret=self.client_secret, refresh_token=self.authdata.refresh_token,
+                client_id=self.client_data["id"],
+                client_secret=self.client_data["secret"],
+                refresh_token=self.authdata.refresh_token,
             )
             # Update the authdata object
             self.authdata.access_token = response["access_token"]
@@ -56,7 +58,6 @@ class Generator:
             self.session.commit()
 
             print(f"New access token will expire at {expires_at}")
-            self.authdata_changed = True
 
         self.client.access_token = self.authdata.access_token
         print("Access ok")
@@ -88,7 +89,7 @@ class Generator:
 
         print("Start syncing")
         for strava_activity in self.client.get_activities(**filters):
-            created = update_or_create_activity(self.session, athlete, strava_activity)
+            created = update_or_create_activity(self.session, athlete, strava_activity, self.thumbnails_path)
             if created:
                 sys.stdout.write("+")
             else:

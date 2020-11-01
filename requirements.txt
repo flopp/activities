@@ -2,5 +2,6 @@ click
 flask
 geopy
 polyline
+py-staticmaps
 sqlalchemy
 stravalib
