@@ -69,7 +69,9 @@ class Generator:
         athlete = self.session.query(Athlete).filter_by(id=strava_athlete.id).first()
         if not athlete:
             athlete = Athlete(
-                id=strava_athlete.id, firstname=strava_athlete.firstname, lastname=strava_athlete.lastname,
+                id=strava_athlete.id,
+                firstname=strava_athlete.firstname,
+                lastname=strava_athlete.lastname,
             )
             self.session.add(athlete)
             self.session.commit()
