@@ -100,7 +100,7 @@ class Generator:
 
         self.session.commit()
 
-    def load(self) -> Tuple[Dict, List[Dict]]:
+    def load(self) -> Tuple[Dict, List[Dict], List[Dict]]:
         athlete = self.session.query(Athlete).first()
         activities = self.session.query(Activity).filter_by(athlete_id=athlete.id).order_by(Activity.start_date_local)
 
@@ -129,4 +129,10 @@ class Generator:
             # Append to result list.
             activity_list.append(activity.to_dict())
 
-        return athlete_dict, activity_list
+        pois_list = []
+        if self.pois:
+            pois_list = [
+                {"name": name, "lat": point["lat"], "lon": point["lon"]} for (name, point) in self.pois.items()
+            ]
+
+        return athlete_dict, activity_list, pois_list

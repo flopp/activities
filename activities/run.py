@@ -59,7 +59,7 @@ def run(
     if sync:
         generator.sync(force)
 
-    athlete, activities_list = generator.load()
+    athlete, activities_list, pois_list = generator.load()
     with open(output, "w") as f:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"const the_last_sync = '{now}';\n")
@@ -70,6 +70,10 @@ def run(
 
         f.write("const the_activities = ")
         json.dump(activities_list, f, indent=2)
+        f.write(";\n")
+
+        f.write("const the_pois = ")
+        json.dump(pois_list, f, indent=2)
         f.write(";\n")
 
     if browser:
