@@ -299,7 +299,7 @@ var App = {
                 this.start_point = L.marker(decoded[0], {icon: this.start_icon}).addTo(this.map);
                 this.end_point = L.marker(decoded.slice(-1)[0], {icon: this.end_icon}).addTo(this.map);
             }
-            this.map.fitBounds(this.track.getBounds());
+            this.map.fitBounds(this.track.getBounds(), {padding: [64, 64]});
         }
     },
 
