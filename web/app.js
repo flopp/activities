@@ -1,4 +1,4 @@
-/* global L, HeatmapOverlay, noUiSlider, the_activities, the_strava_athlete, the_last_sync */
+/* global L, HeatmapOverlay, noUiSlider, the_activities, the_strava_athlete, the_pois, the_last_sync */
 
 $(function() {
     App.init(
