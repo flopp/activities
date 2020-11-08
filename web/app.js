@@ -4,15 +4,17 @@ $(function() {
     App.init(
         (typeof the_activities !== 'undefined') ? the_activities : [],
         (typeof the_strava_athlete !== 'undefined') ? the_strava_athlete : null,
+        (typeof the_pois !== 'undefined') ? the_pois : [],
         (typeof the_last_sync !== 'undefined') ? the_last_sync : "n/a"
     );
 });
 
 var App = {
-    init: function (activities, athlete, last_sync) {
+    init: function (activities, athlete, pois, last_sync) {
         this.activities = activities.reverse();
         this.added_activities = 0;
         this.athlete = athlete;
+        this.pois = pois;
         this.filter_name = null;
         this.filter_type = null;
         this.filter_category = null;
@@ -41,6 +43,12 @@ var App = {
             borderColor: 'red',
             textColor: 'red'
         });
+        this.poi_icon = L.BeautifyIcon.icon({
+            icon: 'star',
+            iconShape: 'circle',
+            borderColor: 'blue',
+            textColor: 'blue'
+        });
 
         var activity_id = null;
         const regex = /^#(\d+)$/;
@@ -50,6 +58,7 @@ var App = {
         } else if (this.activities.length > 0) {
             activity_id = this.activities[0]['strava_id'];
         }
+        this.populatePois();
         this.populateFilters();
         this.filter_max_distance = this.max_distance;
         this.populateActivities(activity_id);
@@ -74,7 +83,7 @@ var App = {
         const cartodark = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png', {
             attribution: 'map data: © <a href="https://osm.org/copyright" target="_blank">OpenStreetMap</a> contributors, SRTM | map style: © <a href="http://opentopomap.org/" target="_blank">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC-BY-SA</a>)'});
         const arcgis_worldimagery = L.tileLayer('https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Source: Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community'});
+            attribution: 'Source: Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community'});
             
         const heatmap_config = {
             // radius should be small ONLY if scaleRadius is true (or small radius is intended)
@@ -103,7 +112,7 @@ var App = {
             "CARTO dark": cartodark,
             "ArcGIS World Imagery": arcgis_worldimagery,
         }, {
-            "Heatmap": this.heatmap
+            "Heatmap": this.heatmap,
         }).addTo(map);
         map.zoomControl.setPosition('bottomright');
 
@@ -204,6 +213,17 @@ var App = {
             control.querySelector("a").onclick = () => {
                 self.toggleSidebar(container_id);
             };
+        });
+    },
+
+    populatePois: function() {
+        const self = this;
+        if (!this.pois) {
+            return;
+        }
+
+        this.pois.forEach(poi => {
+            L.marker(L.latLng(poi["lat"], poi["lon"]), {icon: self.poi_icon, title: poi["name"]}).addTo(self.map);
         });
     },
 
@@ -890,8 +910,6 @@ var App = {
             data.push({lat: d.lat, lng: d.lng, count: Math.log(1 + d.count)});
         });
 
-        console.log(this);
-        console.log(this.heatmap);
         this.heatmap.setData({max: Math.log(1 + max), data: data});
     }
 };
