@@ -1,5 +1,6 @@
 import datetime
 from typing import Any, Dict, List, Optional, Tuple
+from decimal import Decimal
 
 from geopy import distance as geopy_distance  # type: ignore
 import polyline  # type: ignore
@@ -17,6 +18,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker, Session
 from stravalib.model import Activity as StravaActivity  # type: ignore
+import stravalib.unithelper  # type: ignore
 
 from activities.generator.valuerange import ValueRange
 
@@ -60,6 +62,30 @@ def is_point_on_track(
     return False
 
 
+def unit_m(d: Optional[Any]) -> Optional[Decimal]:
+    if d is None:
+        return None
+    return Decimal(float(stravalib.unithelper.meters(d)))
+
+
+def unit_m_per_s(d: Optional[Any]) -> Optional[Decimal]:
+    if d is None:
+        return None
+    return Decimal(float(stravalib.unithelper.meters_per_second(d)))
+
+
+def unit_float(d: Optional[Any]) -> Optional[Decimal]:
+    if d is None:
+        return None
+    return Decimal(float(d))
+
+
+def unit_dt(d: Optional[Any]) -> Optional[datetime.timedelta]:
+    if d is None:
+        return None
+    return datetime.timedelta(d)
+
+
 ACTIVITY_KEYS = [
     "strava_id",
     "athlete_id",
@@ -98,9 +124,9 @@ class Activity(Base):
     average_heartrate = Column(Float)
     average_speed = Column(Float)
     pois = None
-    streak = Optional[int]
+    streak = 0
 
-    def set_streak(self, streak: Optional[int]) -> None:
+    def set_streak(self, streak: int) -> None:
         self.streak = streak
 
     def bbox(self) -> Tuple[Optional[ValueRange], Optional[ValueRange]]:
@@ -134,10 +160,14 @@ class Activity(Base):
         out: Dict[str, Any] = {}
         for key in ACTIVITY_KEYS:
             attr = getattr(self, key)
-            if isinstance(attr, (datetime.timedelta, datetime.datetime)):
-                out[key] = str(attr)
-            else:
+            if attr is None:
                 out[key] = attr
+            elif isinstance(attr, (datetime.timedelta, datetime.datetime)):
+                out[key] = str(attr)
+            elif isinstance(attr, (float, int)):
+                out[key] = attr
+            else:
+                out[key] = str(attr)
 
         if self.pois:
             out["pois"] = self.pois
@@ -155,28 +185,28 @@ def update_or_create_activity(session: Session, athlete: Athlete, strava_activit
             strava_id=strava_activity.id,
             athlete=athlete,
             name=strava_activity.name,
-            distance=strava_activity.distance,
+            distance=unit_m(strava_activity.distance),
             moving_time=strava_activity.moving_time,
             elapsed_time=strava_activity.elapsed_time,
-            total_elevation_gain=strava_activity.total_elevation_gain,
+            total_elevation_gain=unit_m(strava_activity.total_elevation_gain),
             type=strava_activity.type,
             start_date=strava_activity.start_date,
             start_date_local=strava_activity.start_date_local,
             location_country=strava_activity.location_country,
-            average_heartrate=strava_activity.average_heartrate,
-            average_speed=strava_activity.average_speed,
+            average_heartrate=unit_float(strava_activity.average_heartrate),
+            average_speed=unit_m_per_s(strava_activity.average_speed),
         )
         session.add(activity)
         created = True
     else:
         activity.name = strava_activity.name
-        activity.distance = strava_activity.distance
+        activity.distance = unit_m(strava_activity.distance)
         activity.moving_time = strava_activity.moving_time
         activity.elapsed_time = strava_activity.elapsed_time
-        activity.total_elevation_gain = strava_activity.total_elevation_gain
+        activity.total_elevation_gain = unit_m(strava_activity.total_elevation_gain)
         activity.type = strava_activity.type
-        activity.average_heartrate = strava_activity.average_heartrate
-        activity.average_speed = strava_activity.average_speed
+        activity.average_heartrate = unit_float(strava_activity.average_heartrate)
+        activity.average_speed = unit_m_per_s(strava_activity.average_speed)
     try:
         decoded = polyline.decode(strava_activity.map.summary_polyline)
         activity.summary_polyline = strava_activity.map.summary_polyline
