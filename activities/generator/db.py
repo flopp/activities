@@ -1,5 +1,4 @@
 import datetime
-import os
 from typing import Any, Dict, List, Optional, Tuple
 
 from geopy import distance as geopy_distance  # type: ignore
@@ -99,7 +98,10 @@ class Activity(Base):
     average_heartrate = Column(Float)
     average_speed = Column(Float)
     pois = None
-    streak = None
+    streak = Optional[int]
+
+    def set_streak(self, streak: Optional[int]) -> None:
+        self.streak = streak
 
     def bbox(self) -> Tuple[Optional[ValueRange], Optional[ValueRange]]:
         if self.track:
@@ -139,15 +141,13 @@ class Activity(Base):
 
         if self.pois:
             out["pois"] = self.pois
-        if self.streak:
+        if self.streak is not None:
             out["streak"] = self.streak
 
         return out
 
 
-def update_or_create_activity(
-    session: Session, athlete: Athlete, strava_activity: StravaActivity
-) -> bool:
+def update_or_create_activity(session: Session, athlete: Athlete, strava_activity: StravaActivity) -> bool:
     created = False
     activity: Optional[Activity] = session.query(Activity).filter_by(strava_id=strava_activity.id).first()
     if not activity:
@@ -164,19 +164,19 @@ def update_or_create_activity(
             start_date_local=strava_activity.start_date_local,
             location_country=strava_activity.location_country,
             average_heartrate=strava_activity.average_heartrate,
-            average_speed=float(strava_activity.average_speed),
+            average_speed=strava_activity.average_speed,
         )
         session.add(activity)
         created = True
     else:
         activity.name = strava_activity.name
-        activity.distance = float(strava_activity.distance)
+        activity.distance = strava_activity.distance
         activity.moving_time = strava_activity.moving_time
         activity.elapsed_time = strava_activity.elapsed_time
-        activity.total_elevation_gain = float(strava_activity.total_elevation_gain)
+        activity.total_elevation_gain = strava_activity.total_elevation_gain
         activity.type = strava_activity.type
         activity.average_heartrate = strava_activity.average_heartrate
-        activity.average_speed = float(strava_activity.average_speed)
+        activity.average_speed = strava_activity.average_speed
     try:
         decoded = polyline.decode(strava_activity.map.summary_polyline)
         activity.summary_polyline = strava_activity.map.summary_polyline

@@ -2,7 +2,7 @@ import datetime
 import json
 import time
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import arrow  # type: ignore
 import stravalib  # type: ignore
@@ -17,7 +17,7 @@ class Generator:
         self.session = init_db(db_path)
 
         # Load the strava account configuration
-        with open(strava_config_path) as f:
+        with open(strava_config_path, encoding="utf-8") as f:
             strava_config = json.load(f)
             if not {"client_id", "client_secret"} <= strava_config.keys():
                 raise KeyError("Missing keys from strava configuration.")
@@ -26,7 +26,7 @@ class Generator:
 
         # Load the POIs
         if pois_data_path:
-            with open(pois_data_path) as f:
+            with open(pois_data_path, encoding="utf-8") as f:
                 self.pois = json.load(f)
         else:
             self.pois = None
@@ -42,7 +42,7 @@ class Generator:
         now = datetime.datetime.fromtimestamp(time.time())
         expires_at = self.authdata.expires_at
         print(f"Access token valid until {expires_at} (now is {now})")
-        if now + datetime.timedelta(minutes=5) >= expires_at:
+        if expires_at is not None and now + datetime.timedelta(minutes=5) >= expires_at:
             print("Refreshing access token")
             response = self.client.refresh_access_token(
                 client_id=self.client_data["id"],
@@ -98,8 +98,10 @@ class Generator:
 
         self.session.commit()
 
-    def load(self) -> Tuple[Dict, List[Dict], List[Dict]]:
+    def load(self) -> Optional[Tuple[Dict, List[Dict], List[Dict]]]:
         athlete = self.session.query(Athlete).first()
+        if athlete is None:
+            return None
         activities = self.session.query(Activity).filter_by(athlete_id=athlete.id).order_by(Activity.start_date_local)
 
         athlete_dict = athlete.to_dict()
@@ -110,17 +112,21 @@ class Generator:
         for activity in activities:
             # Determine running streak.
             if activity.type == "Run":
-                date = datetime.datetime.strptime(activity.start_date_local, "%Y-%m-%d %H:%M:%S").date()
-                if last_date is None:
-                    streak = 1
-                elif date == last_date:
-                    pass
-                elif date == last_date + datetime.timedelta(days=1):
-                    streak += 1
+                if activity.start_date_local is None:
+                    date = None
+                    streak = 0
                 else:
-                    assert date > last_date
-                    streak = 1
-                activity.streak = streak
+                    date = datetime.datetime.strptime(activity.start_date_local, "%Y-%m-%d %H:%M:%S").date()
+                    if last_date is None:
+                        streak = 1
+                    elif date == last_date:
+                        pass
+                    elif date == last_date + datetime.timedelta(days=1):
+                        streak += 1
+                    else:
+                        assert date > last_date
+                        streak = 1
+                activity.set_streak(streak)
                 last_date = date
             # Determine visited POIs.
             activity.set_pois(self.pois)

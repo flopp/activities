@@ -57,8 +57,11 @@ def run(
     if sync:
         generator.sync(force)
 
-    athlete, activities_list, pois_list = generator.load()
-    with open(output, "w") as f:
+    loaded = generator.load()
+    if loaded is None:
+        raise Exception("failed to load athlete")
+    athlete, activities_list, pois_list = loaded
+    with open(output, "w", encoding="utf-8") as f:
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"const the_last_sync = '{now}';\n")
 

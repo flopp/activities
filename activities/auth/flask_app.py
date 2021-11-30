@@ -14,7 +14,7 @@ app = flask.Flask(__name__)
 
 
 def configure(config: str, data: str, pois: str) -> None:
-    with open(config) as f:
+    with open(config, encoding="utf-8") as f:
         config_content = json.load(f)
 
     app.config["client_id"] = config_content["client_id"]
