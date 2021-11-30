@@ -2,6 +2,5 @@ click
 flask
 geopy
 polyline
-py-staticmaps[cairo]
 sqlalchemy
 stravalib

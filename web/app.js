@@ -349,7 +349,6 @@ var App = {
         if (id === null) {
             window.location.hash = "#";
             this.displayPolyline(null);
-            $("#preview-image").attr("content", "");
         } else {
             window.location.hash = `#${id}`;
             const activity_div = document.querySelector(`.activity[data-id="${id}"]`);
@@ -365,7 +364,6 @@ var App = {
                 $("#activity-date").text(activity['start_date_local'].replace('T', ' '));
                 $("#activity-distance").text(this.format_distance(activity['distance']));
                 $("#activity-time").text(activity['moving_time']);
-                $("#preview-image").attr('content', `img/${id}.png`);
             }
             this.displayPolyline(polyline);
         }

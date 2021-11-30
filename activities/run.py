@@ -13,10 +13,10 @@ from activities.generator import Generator
 HTTP_PORT = 5000
 
 
-def run_auth_app(config: str, data: str, pois: str, thumbnails: str) -> None:
+def run_auth_app(config: str, data: str, pois: str) -> None:
     # Run a simple web server to get authentication data to run the sync process
     # Read from config.json file and output to account.json
-    auth_app.configure(config, data, pois, thumbnails)
+    auth_app.configure(config, data, pois)
     click.launch(f"http://127.0.0.1:{HTTP_PORT}/")
     auth_app.app.run(port=HTTP_PORT, debug=True)
 
@@ -29,7 +29,6 @@ def run_auth_app(config: str, data: str, pois: str, thumbnails: str) -> None:
 @click.option("-p", "--pois", metavar="JSON_FILE", type=click.Path())
 @click.option("-d", "--data", default="data.db", metavar="DATA_FILE", type=click.Path())
 @click.option("-o", "--output", default="web/activities.js", metavar="JS_FILE", type=click.Path())
-@click.option("-t", "--thumbnails", default="web/img", metavar="THUMBNAILS_DIR", type=click.Path())
 @click.option("-b", "--browser", is_flag=True, help="Open the generated website in a web browser.")
 @click.option("-f", "--force", is_flag=True, help="Force re-sync of all activities.")
 def run(
@@ -37,7 +36,6 @@ def run(
     pois: str,
     data: str,
     output: str,
-    thumbnails: str,
     sync: bool,
     browser: bool,
     force: bool,
@@ -51,10 +49,10 @@ def run(
         return
 
     if auth:
-        run_auth_app(config, data, pois, thumbnails)
+        run_auth_app(config, data, pois)
         return
 
-    generator = Generator(config, data, pois, thumbnails)
+    generator = Generator(config, data, pois)
 
     if sync:
         generator.sync(force)

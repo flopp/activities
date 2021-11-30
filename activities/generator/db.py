@@ -17,7 +17,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker, Session
-import staticmaps  # type: ignore
 from stravalib.model import Activity as StravaActivity  # type: ignore
 
 from activities.generator.valuerange import ValueRange
@@ -145,21 +144,9 @@ class Activity(Base):
 
         return out
 
-    def create_thumbnail(self, output_dir: str) -> None:
-        if not self.track:
-            return
-        os.makedirs(output_dir, exist_ok=True)
-        file_name = os.path.join(output_dir, f"{self.strava_id}.png")
-        context = staticmaps.Context()
-        context.set_tile_provider(staticmaps.tile_provider_ArcGISWorldImagery)
-        line = [staticmaps.create_latlng(*point) for point in self.track]
-        context.add_object(staticmaps.Line(line))
-        image = context.render_cairo(800, 500)
-        image.write_to_png(file_name)
-
 
 def update_or_create_activity(
-    session: Session, athlete: Athlete, strava_activity: StravaActivity, thumbnails_path: str
+    session: Session, athlete: Athlete, strava_activity: StravaActivity
 ) -> bool:
     created = False
     activity: Optional[Activity] = session.query(Activity).filter_by(strava_id=strava_activity.id).first()
@@ -179,7 +166,6 @@ def update_or_create_activity(
             average_heartrate=strava_activity.average_heartrate,
             average_speed=float(strava_activity.average_speed),
         )
-        activity.create_thumbnail(thumbnails_path)
         session.add(activity)
         created = True
     else:
@@ -196,7 +182,6 @@ def update_or_create_activity(
         activity.summary_polyline = strava_activity.map.summary_polyline
         if decoded:
             activity.track = decoded
-            activity.create_thumbnail(thumbnails_path)
     except (AttributeError, TypeError):
         pass
 

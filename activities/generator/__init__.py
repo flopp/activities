@@ -12,9 +12,7 @@ from activities.generator.db import init_db, clear_activities, update_or_create_
 
 
 class Generator:
-    def __init__(self, strava_config_path: str, db_path: str, pois_data_path: str, thumbnails_path: str):
-        self.thumbnails_path = thumbnails_path
-
+    def __init__(self, strava_config_path: str, db_path: str, pois_data_path: str):
         self.client = stravalib.Client()
         self.session = init_db(db_path)
 
@@ -91,7 +89,7 @@ class Generator:
 
         print("Start syncing")
         for strava_activity in self.client.get_activities(**filters):
-            created = update_or_create_activity(self.session, athlete, strava_activity, self.thumbnails_path)
+            created = update_or_create_activity(self.session, athlete, strava_activity)
             if created:
                 sys.stdout.write("+")
             else:
