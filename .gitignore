@@ -10,3 +10,4 @@ activities.js
 data.db
 *.egg-info/
 *.ipynb*
+build

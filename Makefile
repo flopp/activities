@@ -1,12 +1,12 @@
 .PHONY: setup
 setup:
 	python3.9 -m venv .env
-	.env/bin/pip install --upgrade pip
-	.env/bin/pip install --upgrade -r requirements.txt
+	.env/bin/pip install --use-pep517 --upgrade pip
+	.env/bin/pip install --use-pep517 --upgrade -r requirements.txt
 
 .PHONY: setup-dev
 setup-dev: setup
-	.env/bin/pip install --upgrade -r requirements-dev.txt
+	.env/bin/pip install --use-pep517 --upgrade -r requirements-dev.txt
 
 .PHONY: format
 format:
